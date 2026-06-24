@@ -13,6 +13,13 @@ export default function FounderPage() {
     professionalSubs: 0,
     aiqProSubs: 0,
     analyticsEvents: 0,
+    analytics: {
+      loginCompleted: 0,
+      resumeUploaded: 0,
+      discoveryCompleted: 0,
+      upgradeClicked: 0,
+      purchaseCompleted: 0,
+    },
   });
 
   useEffect(() => {
@@ -46,6 +53,7 @@ export default function FounderPage() {
         proSubs,
         aiqSubs,
         events,
+        analyticsEventsRaw,
       ] = await Promise.all([
         supabase.from("career_reports").select("id", { count: "exact", head: true }),
         supabase.from("aiq_reports").select("id", { count: "exact", head: true }),
@@ -61,7 +69,36 @@ export default function FounderPage() {
           .eq("tier", "aiq_pro")
           .eq("status", "active"),
         supabase.from("analytics_events").select("id", { count: "exact", head: true }),
+        supabase.from("analytics_events").select("event_name"),
       ]);
+
+      const eventCounts = {
+        loginCompleted: 0,
+        resumeUploaded: 0,
+        discoveryCompleted: 0,
+        upgradeClicked: 0,
+        purchaseCompleted: 0,
+      };
+      
+      analyticsEventsRaw.data?.forEach((event) => {
+        switch (event.event_name) {
+          case "login_completed":
+            eventCounts.loginCompleted++;
+            break;
+          case "resume_uploaded":
+            eventCounts.resumeUploaded++;
+            break;
+          case "discovery_completed":
+            eventCounts.discoveryCompleted++;
+            break;
+          case "upgrade_clicked":
+            eventCounts.upgradeClicked++;
+            break;
+          case "purchase_completed":
+            eventCounts.purchaseCompleted++;
+            break;
+        }
+      });
 
       setMetrics({
         discoveryReports: discovery.count || 0,
@@ -70,6 +107,7 @@ export default function FounderPage() {
         professionalSubs: proSubs.count || 0,
         aiqProSubs: aiqSubs.count || 0,
         analyticsEvents: events.count || 0,
+        analytics: eventCounts,
       });
 
       setLoading(false);
@@ -133,6 +171,33 @@ export default function FounderPage() {
           <p className="mt-3 text-slate-400">
             Based on active Supabase entitlements. RevenueCat should remain the source of truth for billing.
           </p>
+        </div>
+        <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
+          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+            FOUNDER INSIGHTS
+          </p>
+
+          <div className="mt-6 space-y-4 text-slate-300">
+            <p>
+              • {metrics.analytics.loginCompleted} completed logins.
+            </p>
+
+            <p>
+              • {metrics.analytics.resumeUploaded} users uploaded resumes.
+            </p>
+
+            <p>
+              • {metrics.analytics.discoveryCompleted} Discovery Reports were generated.
+            </p>
+
+            <p>
+              • {metrics.analytics.upgradeClicked} upgrade screens were viewed.
+            </p>
+
+            <p>
+              • {metrics.analytics.purchaseCompleted} purchases were completed.
+            </p>
+          </div>
         </div>
       </section>
     </main>
