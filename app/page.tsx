@@ -1,3 +1,5 @@
+import FAQSection from "@/components/FAQSection";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#020617] text-white">
@@ -204,7 +206,7 @@ export default function Home() {
           career coaches, students, and institutions.
         </p>
       </section>
-
+      <FAQSection />
       <footer className="border-t border-slate-800 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 text-sm text-slate-400 md:flex-row md:justify-between">
           <p>© 2026 AureonIQ. All rights reserved.</p>
