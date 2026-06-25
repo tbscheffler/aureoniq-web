@@ -8,6 +8,7 @@ import {
   getOrganizationClients,
   getPendingInvitations,
   sendOrganizationInvitation,
+  revokeOrganizationInvitation,
 } from "@/services/coachService";
 
 export default function CoachPage() {
@@ -78,6 +79,22 @@ export default function CoachPage() {
       alert("Invitation sent.");
     } finally {
       setSendingInvite(false);
+    }
+  }
+
+  async function handleRevokeInvitation(invitationId: string) {
+    const confirmed = confirm("Revoke this invitation? The client will no longer be able to accept it.");
+  
+    if (!confirmed) {
+      return;
+    }
+  
+    try {
+      await revokeOrganizationInvitation(invitationId);
+      await loadCoachDashboard();
+      alert("Invitation revoked.");
+    } catch (error: any) {
+      alert(error.message || "Failed to revoke invitation.");
     }
   }
 
@@ -169,6 +186,12 @@ export default function CoachPage() {
                   <p className="mt-2 text-sm text-slate-400">
                     Expires: {new Date(invite.expires_at).toLocaleDateString()}
                   </p>
+                  <button
+                    onClick={() => handleRevokeInvitation(invite.id)}
+                    className="mt-4 rounded-xl border border-red-500/40 px-4 py-2 text-sm font-bold text-red-300 hover:bg-red-500/10"
+                  >
+                    Revoke Invitation
+                  </button>
                 </div>
               ))}
             </div>
