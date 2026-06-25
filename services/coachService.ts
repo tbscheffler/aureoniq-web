@@ -166,3 +166,65 @@ export async function createOrganizationClientNote(
 
   return data;
 }
+
+export async function getOrganizationClientNotes(
+  organizationClientId: string
+) {
+  const { data, error } = await supabase.rpc("get_organization_client_notes", {
+    p_organization_client_id: organizationClientId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function createOrganizationClientMeeting({
+  organizationClientId,
+  meetingDate,
+  title,
+  summary,
+  followUp,
+}: {
+  organizationClientId: string;
+  meetingDate: string;
+  title: string;
+  summary?: string;
+  followUp?: string;
+}) {
+  const { data, error } = await supabase.rpc(
+    "create_organization_client_meeting",
+    {
+      p_organization_client_id: organizationClientId,
+      p_meeting_date: meetingDate,
+      p_title: title,
+      p_summary: summary || null,
+      p_follow_up: followUp || null,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getOrganizationClientMeetings(
+  organizationClientId: string
+) {
+  const { data, error } = await supabase.rpc(
+    "get_organization_client_meetings",
+    {
+      p_organization_client_id: organizationClientId,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
