@@ -212,7 +212,9 @@ export default function CoachPage() {
                   key={client.id}
                   className="rounded-2xl border border-slate-700 bg-[#020617] p-5"
                 >
-                  <p className="font-black text-white">Client</p>
+                  <p className="font-black text-white">
+                    {client.client_display_name || "Client"}
+                  </p>
                   <p className="mt-2 text-sm text-slate-400">
                     User ID: {client.client_user_id}
                   </p>

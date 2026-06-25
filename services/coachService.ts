@@ -138,3 +138,15 @@ export async function getCoachClientWorkspace(organizationClientId: string) {
 
   return data;
 }
+
+export async function getCoachClientSummary(organizationClientId: string) {
+  const { data, error } = await supabase.rpc("get_coach_client_summary", {
+    p_organization_client_id: organizationClientId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
+
 export default function AcceptInvitePage() {
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [invitation, setInvitation] = useState<any>(null);
   const [message, setMessage] = useState("");
+  const [clientDisplayName, setClientDisplayName] = useState("");
 
   useEffect(() => {
     async function loadInvitation() {
@@ -59,6 +61,7 @@ export default function AcceptInvitePage() {
 
     const { error } = await supabase.rpc("accept_organization_invitation", {
       invite_token: token,
+      client_display_name_input: clientDisplayName.trim(),
     });
 
     if (error) {
@@ -118,6 +121,19 @@ export default function AcceptInvitePage() {
             <li>✓ Billing and payment details</li>
             <li>✓ Account settings</li>
           </ul>
+        </div>
+
+        <div className="mt-8">
+          <label className="text-sm font-black text-[#FBBF24]">
+            How should your coach identify you?
+          </label>
+
+          <input
+            className="mt-3 w-full rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+            placeholder="Example: Tommy S."
+            value={clientDisplayName}
+            onChange={(e) => setClientDisplayName(e.target.value)}
+          />
         </div>
 
         <button

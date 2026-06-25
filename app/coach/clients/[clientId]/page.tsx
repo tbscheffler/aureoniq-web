@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getCoachClientWorkspace } from "@/services/coachService";
+import { getCoachClientSummary } from "@/services/coachService";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -15,7 +15,7 @@ export default function CoachClientWorkspacePage() {
   useEffect(() => {
     async function loadWorkspace() {
       try {
-        const data = await getCoachClientWorkspace(clientId);
+        const data = await getCoachClientSummary(clientId);
         setWorkspace(data);
       } catch (err: any) {
         setError(err.message || "Unable to load client workspace.");
