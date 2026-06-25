@@ -7,6 +7,7 @@ import {
   getOrganizationPlan,
   getOrganizationClients,
   getPendingInvitations,
+  sendOrganizationInvitation,
 } from "@/services/coachService";
 
 export default function CoachPage() {
@@ -67,25 +68,14 @@ export default function CoachPage() {
     try {
       setSendingInvite(true);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      const { error } = await supabase.from("organization_invitations").insert({
-        organization_id: organization.id,
-        invited_by: user?.id,
-        client_email: clientEmail.trim().toLowerCase(),
-        status: "pending",
-      });
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
+      await sendOrganizationInvitation(
+        organization.id,
+        clientEmail.trim().toLowerCase()
+      );
 
       setClientEmail("");
       await loadCoachDashboard();
-      alert("Invitation created. Email sending comes next.");
+      alert("Invitation sent.");
     } finally {
       setSendingInvite(false);
     }

@@ -3,51 +3,73 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+function jsonResponse(body: any, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
+  });
+}
+
 serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", {
+      headers: corsHeaders,
+    });
+  }
+
   try {
     if (req.method !== "POST") {
-      return new Response("Method not allowed", { status: 405 });
+      return jsonResponse({ error: "Method not allowed" }, 405);
     }
 
     const authHeader = req.headers.get("Authorization");
 
     if (!authHeader) {
-      return new Response("Missing authorization", { status: 401 });
+      return jsonResponse({ error: "Missing authorization" }, 401);
     }
 
     const { organization_id, client_email } = await req.json();
 
     if (!organization_id || !client_email) {
-      return new Response("Missing organization_id or client_email", {
-        status: 400,
-      });
+      return jsonResponse(
+        { error: "Missing organization_id or client_email" },
+        400
+      );
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "http://localhost:3000";
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey, {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    });
+    if (!supabaseUrl || !serviceRoleKey || !resendApiKey) {
+      return jsonResponse({ error: "Missing server secrets" }, 500);
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    const token = authHeader.replace("Bearer ", "");
 
     const {
       data: { user },
       error: userError,
-    } = await supabase.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
+    } = await supabase.auth.getUser(token);
 
     if (userError || !user) {
-      return new Response("Unauthorized", { status: 401 });
+      return jsonResponse({ error: "Unauthorized" }, 401);
     }
 
-    const { data: membership } = await supabase
+    const { data: membership, error: membershipError } = await supabase
       .from("organization_members")
       .select("organization_id, role, status")
       .eq("organization_id", organization_id)
@@ -55,8 +77,12 @@ serve(async (req) => {
       .eq("status", "active")
       .single();
 
-    if (!membership || !["owner", "admin", "coach"].includes(membership.role)) {
-      return new Response("Not allowed", { status: 403 });
+    if (membershipError || !membership) {
+      return jsonResponse({ error: "Not an organization member" }, 403);
+    }
+
+    if (!["owner", "admin", "coach"].includes(membership.role)) {
+      return jsonResponse({ error: "Not allowed" }, 403);
     }
 
     const { data: org } = await supabase
@@ -77,7 +103,7 @@ serve(async (req) => {
       .single();
 
     if (inviteError) {
-      return new Response(inviteError.message, { status: 400 });
+      return jsonResponse({ error: inviteError.message }, 400);
     }
 
     const acceptUrl = `${siteUrl}/accept-invite?token=${invitation.token}`;
@@ -107,23 +133,31 @@ serve(async (req) => {
     });
 
     if (!emailResponse.ok) {
-      return new Response("Invitation created, but email failed.", {
-        status: 500,
-      });
+      const resendText = await emailResponse.text();
+      return jsonResponse(
+        {
+          error: "Invitation created, but email failed.",
+          detail: resendText,
+        },
+        500
+      );
     }
 
     await supabase.from("access_audit_log").insert({
       actor_user_id: user.id,
       organization_id,
-      action: "coach_invitation_sent",
+      action: "organization_invitation_sent",
       metadata: {
         invitation_id: invitation.id,
         client_email: client_email.trim().toLowerCase(),
       },
     });
 
-    return Response.json({ success: true });
+    return jsonResponse({ success: true });
   } catch (error) {
-    return new Response(error.message || "Server error", { status: 500 });
+    return jsonResponse(
+      { error: error?.message || "Server error" },
+      500
+    );
   }
 });
