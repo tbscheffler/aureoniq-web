@@ -11,6 +11,7 @@ export default function CoachClientWorkspacePage() {
     const [loading, setLoading] = useState(true);
     const [workspace, setWorkspace] = useState<any>(null);
     const [error, setError] = useState("");
+    const [activeSection, setActiveSection] = useState("discovery");
 
   useEffect(() => {
     async function loadWorkspace() {
@@ -78,8 +79,41 @@ export default function CoachClientWorkspacePage() {
           />
         </div>
 
-        <ReportSection title="Career Discovery Reports" reports={careerReports} />
-        <ReportSection title="AIQ Reports" reports={aiqReports} />
+        <div className="mt-10 grid gap-8 lg:grid-cols-[280px_1fr]">
+          <aside className="rounded-3xl border border-slate-800 bg-[#111827] p-6">
+            <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+              WORKSPACE
+            </p>
+
+            <nav className="mt-6 space-y-3">
+            <WorkspaceNavItem
+              label="Career Discovery"
+              active={activeSection === "discovery"}
+              onClick={() => setActiveSection("discovery")}
+            />
+
+            <WorkspaceNavItem
+              label="AIQ Reports"
+              active={activeSection === "aiq"}
+              onClick={() => setActiveSection("aiq")}
+            />
+
+            <WorkspaceNavItem label="Coach Notes" comingSoon />
+            <WorkspaceNavItem label="Meeting History" comingSoon />
+            <WorkspaceNavItem label="Action Plan" comingSoon />
+            </nav>
+          </aside>
+
+          <div className="space-y-8">
+            {activeSection === "discovery" ? (
+              <ReportSection title="Career Discovery Reports" reports={careerReports} />
+            ) : null}
+
+            {activeSection === "aiq" ? (
+              <ReportSection title="AIQ Reports" reports={aiqReports} />
+            ) : null}
+          </div>
+        </div>
       </section>
     </main>
   );
@@ -91,6 +125,41 @@ function MetricCard({ title, value }: { title: string; value: any }) {
       <p className="text-sm font-bold text-slate-400">{title}</p>
       <p className="mt-4 text-3xl font-black text-[#FBBF24]">{value}</p>
     </div>
+  );
+}
+
+function WorkspaceNavItem({
+  label,
+  active = false,
+  comingSoon = false,
+  onClick,
+}: {
+  label: string;
+  active?: boolean;
+  comingSoon?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={comingSoon}
+      className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-bold disabled:cursor-not-allowed disabled:opacity-70 ${
+        active
+          ? "border-[#FBBF24] bg-[#FBBF24]/10 text-[#FBBF24]"
+          : "border-slate-700 bg-[#020617] text-slate-300 hover:border-slate-500"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <span>{label}</span>
+
+        {comingSoon ? (
+          <span className="rounded-full bg-slate-800 px-2 py-1 text-[10px] text-slate-400">
+            Soon
+          </span>
+        ) : null}
+      </div>
+    </button>
   );
 }
 
