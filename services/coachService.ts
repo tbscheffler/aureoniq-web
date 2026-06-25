@@ -110,3 +110,19 @@ export async function getOrganizationPlan(organizationId: string) {
   
     return data;
   }
+
+  /**
+ * Revokes a pending organization invitation.
+ * This keeps history but prevents the invitation from being accepted.
+ */
+export async function revokeOrganizationInvitation(invitationId: string) {
+  const { error } = await supabase
+    .from("organization_invitations")
+    .update({ status: "revoked" })
+    .eq("id", invitationId)
+    .eq("status", "pending");
+
+  if (error) {
+    throw error;
+  }
+}
