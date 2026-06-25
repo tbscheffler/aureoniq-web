@@ -5,12 +5,14 @@ import { useParams } from "next/navigation";
 import {
   getCoachClientSummary,
 } from "@/services/coachService";
-import MetricCard from "@/components/coach/MetricCard";
-import ClientWorkspaceSidebar from "@/components/coach/ClientWorkspaceSidebar";
-import ReportSection from "@/components/coach/ReportSection";
-import CoachNotesSection from "@/components/coach/CoachNotesSection";
-import MeetingHistorySection from "@/components/coach/MeetingHistorySection";
-import ActionPlanSection from "@/components/coach/ActionPlanSection";
+import {
+  MetricCard,
+  ClientWorkspaceSidebar,
+  ReportSection,
+  CoachNotesSection,
+  MeetingHistorySection,
+  ActionPlanSection,
+} from "@/components/coach";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
