@@ -5,23 +5,47 @@ import { supabase } from "@/lib/supabaseClient";
 
 export default function AcceptInvitePage() {
   const [loading, setLoading] = useState(true);
+  const [accepting, setAccepting] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [invitation, setInvitation] = useState<any>(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const inviteToken = params.get("token");
-    setToken(inviteToken);
-    setLoading(false);
+    async function loadInvitation() {
+      const params = new URLSearchParams(window.location.search);
+      const inviteToken = params.get("token");
+
+      if (!inviteToken) {
+        setMessage("Missing invitation token.");
+        setLoading(false);
+        return;
+      }
+
+      setToken(inviteToken);
+
+      const { data, error } = await supabase
+        .from("organization_invitations")
+        .select("id, client_email, status, expires_at, organizations(name)")
+        .eq("token", inviteToken)
+        .maybeSingle();
+
+      if (error || !data) {
+        setMessage("Invitation not found or no longer available.");
+        setLoading(false);
+        return;
+      }
+
+      setInvitation(data);
+      setLoading(false);
+    }
+
+    loadInvitation();
   }, []);
 
   async function acceptInvitation() {
-    if (!token) {
-      alert("Missing invitation token.");
-      return;
-    }
+    if (!token) return;
 
-    setLoading(true);
+    setAccepting(true);
 
     const {
       data: { user },
@@ -29,7 +53,7 @@ export default function AcceptInvitePage() {
 
     if (!user) {
       setMessage("Please sign in first, then return to this invitation link.");
-      setLoading(false);
+      setAccepting(false);
       return;
     }
 
@@ -39,13 +63,27 @@ export default function AcceptInvitePage() {
 
     if (error) {
       setMessage(error.message);
-      setLoading(false);
+      setAccepting(false);
       return;
     }
 
     setMessage("Invitation accepted. Your coach can now view your shared career reports.");
-    setLoading(false);
+    setAccepting(false);
   }
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#020617] text-white">
+        <section className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6">
+          <p className="font-black text-[#FBBF24]">Loading invitation...</p>
+        </section>
+      </main>
+    );
+  }
+
+  const orgName = Array.isArray(invitation?.organizations)
+    ? invitation.organizations[0]?.name
+    : invitation?.organizations?.name;
 
   return (
     <main className="min-h-screen bg-[#020617] text-white">
@@ -58,20 +96,36 @@ export default function AcceptInvitePage() {
           COACH INVITATION
         </p>
 
-        <h1 className="text-4xl font-black">
-          Accept coaching access
-        </h1>
+        <h1 className="text-4xl font-black">Connect with your coach</h1>
 
         <p className="mt-5 text-lg leading-8 text-slate-300">
-          Accepting this invitation gives your coach permission to view your AureonIQ career reports. Your account, billing, password, and private settings remain yours.
+          {orgName || "Your coach"} invited you to connect inside AureonIQ.
         </p>
+
+        <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-6">
+          <p className="font-black text-[#FBBF24]">What your coach can view</p>
+          <ul className="mt-4 space-y-2 text-slate-300">
+            <li>✓ Career Discovery Reports</li>
+            <li>✓ AIQ Reports</li>
+            <li>✓ Future reports while connected</li>
+          </ul>
+        </div>
+
+        <div className="mt-5 rounded-3xl border border-slate-800 bg-[#111827] p-6">
+          <p className="font-black text-[#FBBF24]">What stays private</p>
+          <ul className="mt-4 space-y-2 text-slate-300">
+            <li>✓ Password and authentication</li>
+            <li>✓ Billing and payment details</li>
+            <li>✓ Account settings</li>
+          </ul>
+        </div>
 
         <button
           onClick={acceptInvitation}
-          disabled={loading || !token}
+          disabled={accepting || invitation?.status !== "pending"}
           className="mt-8 rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617] disabled:opacity-60"
         >
-          {loading ? "Loading..." : "Accept Invitation"}
+          {accepting ? "Accepting..." : "Accept Invitation"}
         </button>
 
         {message ? (
