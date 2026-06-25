@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import {
+  getCurrentOrganization,
+  getOrganizationPlan,
+  getOrganizationClients,
+  getPendingInvitations,
+} from "@/services/coachService";
 
 export default function CoachPage() {
   const [loading, setLoading] = useState(true);
@@ -13,58 +19,29 @@ export default function CoachPage() {
   const [sendingInvite, setSendingInvite] = useState(false);
 
   async function loadCoachDashboard() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      window.location.href = "/login";
-      return;
-    }
-
-    const { data: membership } = await supabase
-      .from("organization_members")
-      .select("organization_id, role")
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .maybeSingle();
-
-    if (!membership) {
+    try {
+      const membership = await getCurrentOrganization();
+  
+      const organizationId = membership.organization_id;
+      const orgData = Array.isArray(membership.organizations)
+        ? membership.organizations[0]
+        : membership.organizations;
+  
+      const [planData, clientData, inviteData] = await Promise.all([
+        getOrganizationPlan(organizationId),
+        getOrganizationClients(organizationId),
+        getPendingInvitations(organizationId),
+      ]);
+  
+      setOrganization(orgData);
+      setPlan(planData);
+      setClients(clientData || []);
+      setInvitations(inviteData || []);
+      setLoading(false);
+    } catch (error: any) {
+      console.log("LOAD COACH DASHBOARD ERROR:", error.message);
       window.location.href = "/dashboard";
-      return;
     }
-
-    const { data: orgData } = await supabase
-      .from("organizations")
-      .select("*")
-      .eq("id", membership.organization_id)
-      .maybeSingle();
-
-    const { data: planData } = await supabase
-      .from("organization_plans")
-      .select("*")
-      .eq("organization_id", membership.organization_id)
-      .eq("status", "active")
-      .maybeSingle();
-
-    const { data: clientData } = await supabase
-      .from("organization_clients")
-      .select("*")
-      .eq("organization_id", membership.organization_id)
-      .eq("status", "active");
-
-    const { data: inviteData } = await supabase
-      .from("organization_invitations")
-      .select("*")
-      .eq("organization_id", membership.organization_id)
-      .eq("status", "pending")
-      .order("created_at", { ascending: false });
-
-    setOrganization(orgData);
-    setPlan(planData);
-    setClients(clientData || []);
-    setInvitations(inviteData || []);
-    setLoading(false);
   }
 
   useEffect(() => {
