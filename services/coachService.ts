@@ -84,3 +84,28 @@ export async function getOrganizationPlan(organizationId: string) {
   
     return data || [];
   }
+
+  /**
+ * Sends an organization invitation through a secure Supabase Edge Function.
+ * This creates the invitation and sends the email from the backend.
+ */
+export async function sendOrganizationInvitation(
+    organizationId: string,
+    clientEmail: string
+  ) {
+    const { data, error } = await supabase.functions.invoke(
+      "send-coach-invite",
+      {
+        body: {
+          organization_id: organizationId,
+          client_email: clientEmail,
+        },
+      }
+    );
+  
+    if (error) {
+      throw error;
+    }
+  
+    return data;
+  }
