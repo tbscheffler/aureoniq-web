@@ -126,3 +126,15 @@ export async function revokeOrganizationInvitation(invitationId: string) {
     throw error;
   }
 }
+
+export async function getCoachClientWorkspace(organizationClientId: string) {
+  const { data, error } = await supabase.rpc("get_coach_client_workspace", {
+    p_organization_client_id: organizationClientId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

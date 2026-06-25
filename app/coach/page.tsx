@@ -222,6 +222,12 @@ export default function CoachPage() {
                   <p className="mt-2 text-sm text-slate-400">
                     Sponsored Tier: {client.sponsored_tier}
                   </p>
+                  <a
+                    href={`/coach/clients/${client.id}`}
+                    className="mt-4 inline-block rounded-xl bg-[#FBBF24] px-4 py-2 text-sm font-black text-[#020617]"
+                  >
+                    Open Workspace
+                  </a>
                 </div>
               ))}
             </div>
