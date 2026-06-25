@@ -8,7 +8,12 @@ import {
   getOrganizationClientNotes,
   createOrganizationClientMeeting,
   getOrganizationClientMeetings,
+  createOrganizationClientActionItem,
+  getOrganizationClientActionItems,
 } from "@/services/coachService";
+import MetricCard from "@/components/coach/MetricCard";
+import ClientWorkspaceSidebar from "@/components/coach/ClientWorkspaceSidebar";
+import ReportSection from "@/components/coach/ReportSection";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -86,37 +91,10 @@ export default function CoachClientWorkspacePage() {
         </div>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[280px_1fr]">
-          <aside className="rounded-3xl border border-slate-800 bg-[#111827] p-6">
-            <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-              WORKSPACE
-            </p>
-
-            <nav className="mt-6 space-y-3">
-            <WorkspaceNavItem
-              label="Career Discovery"
-              active={activeSection === "discovery"}
-              onClick={() => setActiveSection("discovery")}
-            />
-
-            <WorkspaceNavItem
-              label="AIQ Reports"
-              active={activeSection === "aiq"}
-              onClick={() => setActiveSection("aiq")}
-            />
-
-            <WorkspaceNavItem
-              label="Coach Notes"
-              active={activeSection === "notes"}
-              onClick={() => setActiveSection("notes")}
-            />
-            <WorkspaceNavItem
-              label="Meeting History"
-              active={activeSection === "meetings"}
-              onClick={() => setActiveSection("meetings")}
-            />
-            <WorkspaceNavItem label="Action Plan" comingSoon />
-            </nav>
-          </aside>
+          <ClientWorkspaceSidebar
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+          />
 
           <div className="space-y-8">
             {activeSection === "discovery" ? (
@@ -134,6 +112,10 @@ export default function CoachClientWorkspacePage() {
             {activeSection === "meetings" ? (
               <MeetingHistorySection organizationClientId={clientId} />
             ) : null}
+
+            {activeSection === "actions" ? (
+              <ActionPlanSection organizationClientId={clientId} />
+            ) : null}
           </div>
         </div>
       </section>
@@ -141,86 +123,7 @@ export default function CoachClientWorkspacePage() {
   );
 }
 
-function MetricCard({ title, value }: { title: string; value: any }) {
-  return (
-    <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
-      <p className="text-sm font-bold text-slate-400">{title}</p>
-      <p className="mt-4 text-3xl font-black text-[#FBBF24]">{value}</p>
-    </div>
-  );
-}
 
-function WorkspaceNavItem({
-  label,
-  active = false,
-  comingSoon = false,
-  onClick,
-}: {
-  label: string;
-  active?: boolean;
-  comingSoon?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={comingSoon}
-      className={`w-full rounded-2xl border px-4 py-3 text-left text-sm font-bold disabled:cursor-not-allowed disabled:opacity-70 ${
-        active
-          ? "border-[#FBBF24] bg-[#FBBF24]/10 text-[#FBBF24]"
-          : "border-slate-700 bg-[#020617] text-slate-300 hover:border-slate-500"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <span>{label}</span>
-
-        {comingSoon ? (
-          <span className="rounded-full bg-slate-800 px-2 py-1 text-[10px] text-slate-400">
-            Soon
-          </span>
-        ) : null}
-      </div>
-    </button>
-  );
-}
-
-function ReportSection({ title, reports }: { title: string; reports: any[] }) {
-  return (
-    <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
-      <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-        {title.toUpperCase()}
-      </p>
-
-      {reports.length === 0 ? (
-        <p className="mt-4 text-slate-400">No reports shared yet.</p>
-      ) : (
-        <div className="mt-6 grid gap-4">
-          {reports.map((report) => (
-            <div
-              key={report.id}
-              className="rounded-2xl border border-slate-700 bg-[#020617] p-5"
-            >
-              <p className="font-black text-white">
-                {report.title || "Career Report"}
-              </p>
-
-              <p className="mt-2 text-sm text-slate-400">
-                Created:{" "}
-                {report.created_at
-                  ? new Date(report.created_at).toLocaleString()
-                  : "Unknown"}
-              </p>
-
-              <ReadableReport report={report} />
-
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 function CoachNotesSection({
   organizationClientId,
@@ -332,94 +235,155 @@ function CoachNotesSection({
   );
 }
 
-function ReadableReport({ report }: { report: any }) {
-    const reportJson = report.report_json || report.aiq_json || report.data || {};
+
+
+  function ActionPlanSection({
+    organizationClientId,
+  }: {
+    organizationClientId: string;
+  }) {
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [dueDate, setDueDate] = useState("");
+    const [items, setItems] = useState<any[]>([]);
+    const [loadingItems, setLoadingItems] = useState(true);
+    const [saving, setSaving] = useState(false);
+  
+    async function loadActionItems() {
+      try {
+        setLoadingItems(true);
+        const data = await getOrganizationClientActionItems(organizationClientId);
+        setItems(data || []);
+      } catch (error: any) {
+        alert(error.message || "Failed to load action items.");
+      } finally {
+        setLoadingItems(false);
+      }
+    }
+  
+    useEffect(() => {
+      loadActionItems();
+    }, [organizationClientId]);
+  
+    async function handleSaveActionItem() {
+      if (!title.trim()) {
+        alert("Add an action item title first.");
+        return;
+      }
+  
+      try {
+        setSaving(true);
+  
+        await createOrganizationClientActionItem({
+          organizationClientId,
+          title,
+          description,
+          dueDate: dueDate || undefined,
+        });
+  
+        setTitle("");
+        setDescription("");
+        setDueDate("");
+  
+        await loadActionItems();
+        alert("Action item saved.");
+      } catch (error: any) {
+        alert(error.message || "Failed to save action item.");
+      } finally {
+        setSaving(false);
+      }
+    }
   
     return (
-      <div className="mt-4 space-y-5">
-        {reportJson.summary ? (
-          <div>
-            <p className="text-sm font-black text-[#FBBF24]">Summary</p>
-            <p className="mt-2 leading-7 text-slate-300">{reportJson.summary}</p>
-          </div>
-        ) : null}
+      <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
+        <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+          ACTION PLAN
+        </p>
   
-        {Array.isArray(reportJson.hiddenOpportunities) ? (
-          <div>
-            <p className="text-sm font-black text-[#FBBF24]">
-              Hidden Opportunities
-            </p>
+        <h2 className="mt-4 text-3xl font-black text-white">
+          Next steps for this client
+        </h2>
   
-            <div className="mt-3 grid gap-3">
-              {reportJson.hiddenOpportunities.map((item: any, index: number) => (
+        <p className="mt-4 max-w-2xl leading-7 text-slate-300">
+          Create practical follow-up items from reports, meetings, and coaching
+          conversations.
+        </p>
+  
+        <div className="mt-8 grid gap-4 md:grid-cols-[1fr_180px]">
+          <input
+            className="rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+            placeholder="Action item title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+  
+          <input
+            type="date"
+            className="rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+        </div>
+  
+        <textarea
+          className="mt-4 min-h-28 w-full rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+          placeholder="Description or coaching context..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+  
+        <button
+          onClick={handleSaveActionItem}
+          disabled={saving}
+          className="mt-4 rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617] disabled:opacity-60"
+        >
+          {saving ? "Saving..." : "Save Action Item"}
+        </button>
+  
+        <div className="mt-10">
+          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+            ACTIVE PLAN
+          </p>
+  
+          {loadingItems ? (
+            <p className="mt-4 text-slate-400">Loading action items...</p>
+          ) : items.length === 0 ? (
+            <p className="mt-4 text-slate-400">No action items yet.</p>
+          ) : (
+            <div className="mt-5 space-y-4">
+              {items.map((item) => (
                 <div
-                  key={index}
-                  className="rounded-xl border border-slate-700 bg-black/30 p-4"
+                  key={item.id}
+                  className="rounded-2xl border border-slate-700 bg-[#020617] p-5"
                 >
-                  <p className="font-bold text-white">
-                    {item.title || item.role || "Opportunity"}
-                  </p>
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <p className="text-lg font-black text-white">
+                        {item.title}
+                      </p>
   
-                  {item.reason ? (
-                    <p className="mt-2 text-sm leading-6 text-slate-400">
-                      {item.reason}
+                      {item.description ? (
+                        <p className="mt-3 whitespace-pre-wrap leading-7 text-slate-300">
+                          {item.description}
+                        </p>
+                      ) : null}
+                    </div>
+  
+                    <span className="w-fit rounded-full border border-[#FBBF24]/40 bg-[#FBBF24]/10 px-3 py-1 text-xs font-bold text-[#FBBF24]">
+                      {item.status || "open"}
+                    </span>
+                  </div>
+  
+                  {item.due_date ? (
+                    <p className="mt-4 text-sm text-slate-500">
+                      Due {new Date(item.due_date).toLocaleDateString()}
                     </p>
                   ) : null}
                 </div>
               ))}
             </div>
-          </div>
-        ) : null}
-  
-        {Array.isArray(reportJson.skillGaps) ? (
-          <div>
-            <p className="text-sm font-black text-[#FBBF24]">Skill Gaps</p>
-  
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
-              {reportJson.skillGaps.map((gap: any, index: number) => (
-                <div
-                  key={index}
-                  className="rounded-xl border border-slate-700 bg-black/30 p-4"
-                >
-                  <p className="font-bold text-white">
-                    {gap.skill || "Skill"}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Difficulty: {gap.difficulty || "Not specified"}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Time to learn: {gap.timeToLearn || "Not specified"}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-  
-        {Array.isArray(reportJson.futurePaths) ? (
-          <div>
-            <p className="text-sm font-black text-[#FBBF24]">Future Paths</p>
-  
-            <div className="mt-3 grid gap-3">
-              {reportJson.futurePaths.map((path: any, index: number) => (
-                <div
-                  key={index}
-                  className="rounded-xl border border-slate-700 bg-black/30 p-4"
-                >
-                  <p className="font-bold text-white">
-                    {path.title || path.role || "Future Path"}
-                  </p>
-  
-                  {path.description ? (
-                    <p className="mt-2 text-sm leading-6 text-slate-400">
-                      {path.description}
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
+          )}
+        </div>
       </div>
     );
   }
@@ -430,6 +394,7 @@ function ReadableReport({ report }: { report: any }) {
     organizationClientId: string;
   }) {
     const [meetingDate, setMeetingDate] = useState("");
+    const [meetingTime, setMeetingTime] = useState("");
     const [title, setTitle] = useState("Coaching Session");
     const [summary, setSummary] = useState("");
     const [followUp, setFollowUp] = useState("");
@@ -464,13 +429,16 @@ function ReadableReport({ report }: { report: any }) {
   
         await createOrganizationClientMeeting({
           organizationClientId,
-          meetingDate: new Date(meetingDate).toISOString(),
+          meetingDate: new Date(
+            `${meetingDate}T${meetingTime || "12:00"}`
+          ).toISOString(),
           title,
           summary,
           followUp,
         });
   
         setMeetingDate("");
+        setMeetingTime("");
         setTitle("Coaching Session");
         setSummary("");
         setFollowUp("");
@@ -496,10 +464,17 @@ function ReadableReport({ report }: { report: any }) {
   
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           <input
-            type="datetime-local"
+            type="date"
             className="rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
             value={meetingDate}
             onChange={(e) => setMeetingDate(e.target.value)}
+          />
+
+          <input
+            type="time"
+            className="rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+            value={meetingTime}
+            onChange={(e) => setMeetingTime(e.target.value)}
           />
   
           <input
@@ -580,3 +555,4 @@ function ReadableReport({ report }: { report: any }) {
       </div>
     );
   }
+

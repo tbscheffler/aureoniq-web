@@ -228,3 +228,48 @@ export async function getOrganizationClientMeetings(
 
   return data || [];
 }
+
+export async function createOrganizationClientActionItem({
+  organizationClientId,
+  title,
+  description,
+  dueDate,
+}: {
+  organizationClientId: string;
+  title: string;
+  description?: string;
+  dueDate?: string;
+}) {
+  const { data, error } = await supabase.rpc(
+    "create_organization_client_action_item",
+    {
+      p_organization_client_id: organizationClientId,
+      p_title: title,
+      p_description: description || null,
+      p_due_date: dueDate || null,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getOrganizationClientActionItems(
+  organizationClientId: string
+) {
+  const { data, error } = await supabase.rpc(
+    "get_organization_client_action_items",
+    {
+      p_organization_client_id: organizationClientId,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
