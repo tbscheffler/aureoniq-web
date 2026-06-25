@@ -212,18 +212,26 @@ export default function CoachPage() {
                   key={client.id}
                   className="rounded-2xl border border-slate-700 bg-[#020617] p-5"
                 >
-                  <p className="font-black text-white">
-                    {client.client_display_name || "Client"}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-400">
-                    User ID: {client.client_user_id}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Access: {client.access_level}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Sponsored Tier: {client.sponsored_tier}
-                  </p>
+                <p className="text-xl font-black text-white">
+                  {client.client_display_name || "Client"}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-[#FBBF24]/40 bg-[#FBBF24]/10 px-3 py-1 text-xs font-bold text-[#FBBF24]">
+                    {client.sponsored_tier || "Sponsored Access"}
+                  </span>
+
+                  <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-300">
+                    Reports Shared
+                  </span>
+                </div>
+
+                <p className="mt-4 text-sm text-slate-400">
+                  Connected{" "}
+                  {client.started_at
+                    ? new Date(client.started_at).toLocaleDateString()
+                    : "recently"}
+                </p>
                   <a
                     href={`/coach/clients/${client.id}`}
                     className="mt-4 inline-block rounded-xl bg-[#FBBF24] px-4 py-2 text-sm font-black text-[#020617]"
