@@ -150,3 +150,19 @@ export async function getCoachClientSummary(organizationClientId: string) {
 
   return data;
 }
+
+export async function createOrganizationClientNote(
+  organizationClientId: string,
+  note: string
+) {
+  const { data, error } = await supabase.rpc("create_organization_client_note", {
+    p_organization_client_id: organizationClientId,
+    p_note: note,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

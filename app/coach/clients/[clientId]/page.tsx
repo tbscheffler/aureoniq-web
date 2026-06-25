@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getCoachClientSummary } from "@/services/coachService";
+import {
+  getCoachClientSummary,
+  createOrganizationClientNote,
+} from "@/services/coachService";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -98,7 +101,11 @@ export default function CoachClientWorkspacePage() {
               onClick={() => setActiveSection("aiq")}
             />
 
-            <WorkspaceNavItem label="Coach Notes" comingSoon />
+            <WorkspaceNavItem
+              label="Coach Notes"
+              active={activeSection === "notes"}
+              onClick={() => setActiveSection("notes")}
+            />
             <WorkspaceNavItem label="Meeting History" comingSoon />
             <WorkspaceNavItem label="Action Plan" comingSoon />
             </nav>
@@ -111,6 +118,10 @@ export default function CoachClientWorkspacePage() {
 
             {activeSection === "aiq" ? (
               <ReportSection title="AIQ Reports" reports={aiqReports} />
+            ) : null}
+
+            {activeSection === "notes" ? (
+              <CoachNotesSection organizationClientId={clientId} />
             ) : null}
           </div>
         </div>
@@ -196,6 +207,65 @@ function ReportSection({ title, reports }: { title: string; reports: any[] }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function CoachNotesSection({
+  organizationClientId,
+}: {
+  organizationClientId: string;
+}) {
+  const [note, setNote] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSaveNote() {
+    if (!note.trim()) {
+      alert("Write a note first.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await createOrganizationClientNote(organizationClientId, note);
+      setNote("");
+      alert("Note saved.");
+    } catch (error: any) {
+      alert(error.message || "Failed to save note.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
+      <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+        COACH NOTES
+      </p>
+
+      <h2 className="mt-4 text-3xl font-black text-white">
+        Private organization notes
+      </h2>
+
+      <p className="mt-4 max-w-2xl leading-7 text-slate-300">
+        Notes belong to the organization, not the client account. They are kept
+        separate from the client’s immutable AureonIQ reports.
+      </p>
+
+      <textarea
+        className="mt-8 min-h-40 w-full rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+        placeholder="Write a coaching note..."
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+      />
+
+      <button
+        onClick={handleSaveNote}
+        disabled={saving}
+        className="mt-4 rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617] disabled:opacity-60"
+      >
+        {saving ? "Saving..." : "Save Note"}
+      </button>
     </div>
   );
 }
