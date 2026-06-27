@@ -19,6 +19,7 @@ import InviteClientCard from "@/components/coach/InviteClientCard";
 import PendingInvitations from "@/components/coach/PendingInvitations";
 import ActiveClients from "@/components/coach/ActiveClients";
 import SeatUsageCard from "@/components/coach/SeatUsageCard";
+import CoachShell from "@/components/coach/CoachShell";
 
 export default function CoachPage() {
   const [loading, setLoading] = useState(true);
@@ -132,11 +133,8 @@ export default function CoachPage() {
   const activeClients = clients.length;
 
   return (
-    <main className="min-h-screen bg-[#020617] text-white">
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <Link href="/" className="text-sm font-bold text-[#FBBF24]">
-          ← Back to AureonIQ
-        </Link>
+    <CoachShell>
+    <section>
 
         <div className="mt-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -154,7 +152,7 @@ export default function CoachPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          {/* <div className="flex flex-wrap gap-3">
             <Link
               href="/coach"
               className="rounded-2xl bg-[#FBBF24] px-5 py-3 font-black text-[#020617]"
@@ -182,7 +180,7 @@ export default function CoachPage() {
             >
               Settings
             </Link>
-          </div>
+          </div> */}
         </div>
 
         <CoachMetrics
@@ -221,8 +219,8 @@ export default function CoachPage() {
         />
 
         <ActiveClients clients={clients} />
-      </section>
-    </main>
+        </section>
+        </CoachShell>
   );
 }
 
