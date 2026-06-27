@@ -415,7 +415,7 @@ export async function getCoachDashboardStats(organizationId: string) {
 }
 
 export async function getCoachRecentActivity(organizationId: string) {
-  const { data, error } = await supabase
+  const { data: activity, error } = await supabase
     .from("access_audit_log")
     .select("*")
     .eq("organization_id", organizationId)
@@ -426,5 +426,27 @@ export async function getCoachRecentActivity(organizationId: string) {
     throw error;
   }
 
-  return data || [];
+  const actorUserIds = Array.from(
+    new Set((activity || []).map((item) => item.actor_user_id).filter(Boolean))
+  );
+
+  if (actorUserIds.length === 0) {
+    return activity || [];
+  }
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("user_id, display_name, avatar_url")
+    .in("user_id", actorUserIds);
+
+  if (profilesError) {
+    throw profilesError;
+  }
+
+  return (activity || []).map((item) => ({
+    ...item,
+    actor_profile:
+      profiles?.find((profile) => profile.user_id === item.actor_user_id) ||
+      null,
+  }));
 }

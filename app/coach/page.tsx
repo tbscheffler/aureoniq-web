@@ -18,6 +18,7 @@ import CoachMetrics from "@/components/coach/CoachMetrics";
 import InviteClientCard from "@/components/coach/InviteClientCard";
 import PendingInvitations from "@/components/coach/PendingInvitations";
 import ActiveClients from "@/components/coach/ActiveClients";
+import SeatUsageCard from "@/components/coach/SeatUsageCard";
 
 export default function CoachPage() {
   const [loading, setLoading] = useState(true);
@@ -83,15 +84,17 @@ export default function CoachPage() {
 
     try {
       setSendingInvite(true);
-
+    
       await sendOrganizationInvitation(
         organization.id,
         clientEmail.trim().toLowerCase()
       );
-
+    
       setClientEmail("");
       await loadCoachDashboard();
       alert("Invitation sent.");
+    } catch (error: any) {
+      alert(error.message || "Failed to send invitation.");
     } finally {
       setSendingInvite(false);
     }
@@ -167,6 +170,13 @@ export default function CoachPage() {
             </Link>
 
             <Link
+              href="/coach/billing"
+              className="rounded-2xl border border-slate-700 bg-[#111827] px-5 py-3 font-black text-white hover:border-[#FBBF24]"
+            >
+              Billing
+            </Link>
+
+            <Link
               href="/coach/settings"
               className="rounded-2xl border border-slate-700 bg-[#111827] px-5 py-3 font-black text-white hover:border-[#FBBF24]"
             >
@@ -188,6 +198,12 @@ export default function CoachPage() {
           planName={plan?.plan_type || "Free Beta"}
         />
 
+        <SeatUsageCard
+          activeClients={stats?.activeClients ?? activeClients}
+          clientLimit={clientLimit}
+          planName={plan?.plan_type || "free_beta"}
+        />
+
         <QuickActions />
 
         <RecentActivity activity={activity} />
@@ -204,7 +220,7 @@ export default function CoachPage() {
           handleRevokeInvitation={handleRevokeInvitation}
         />
 
-<ActiveClients clients={clients} />
+        <ActiveClients clients={clients} />
       </section>
     </main>
   );

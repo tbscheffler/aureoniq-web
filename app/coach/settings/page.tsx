@@ -33,9 +33,10 @@ export default function CoachSettingsPage() {
               description="Invite and manage coaches."
             />
   
-            <SettingsCard
+              <SettingsCard
               title="Subscription"
               description="Billing, seats, and plan management."
+              href="/coach/billing"
             />
   
             <SettingsCard
@@ -51,9 +52,11 @@ export default function CoachSettingsPage() {
   function SettingsCard({
     title,
     description,
+    href,
   }: {
     title: string;
     description: string;
+    href?: string;
   }) {
     return (
       <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
@@ -65,12 +68,21 @@ export default function CoachSettingsPage() {
           {description}
         </p>
   
-        <button
-          disabled
-          className="mt-8 rounded-2xl bg-[#FBBF24]/20 px-5 py-3 font-black text-[#FBBF24]"
-        >
-          Coming Soon
-        </button>
+        {href ? (
+          <a
+            href={href}
+            className="mt-8 inline-block rounded-2xl bg-[#FBBF24] px-5 py-3 font-black text-[#020617]"
+          >
+            Open
+          </a>
+        ) : (
+          <button
+            disabled
+            className="mt-8 rounded-2xl bg-[#FBBF24]/20 px-5 py-3 font-black text-[#FBBF24]"
+          >
+            Coming Soon
+          </button>
+        )}
       </div>
     );
   }

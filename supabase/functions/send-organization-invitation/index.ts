@@ -85,6 +85,38 @@ serve(async (req) => {
       return jsonResponse({ error: "Not allowed" }, 403);
     }
 
+    const { data: activePlan, error: planError } = await supabase
+      .from("organization_plans")
+      .select("managed_client_limit")
+      .eq("organization_id", organization_id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (planError) {
+      return jsonResponse({ error: planError.message }, 400);
+    }
+
+    const clientLimit = Number(activePlan?.managed_client_limit ?? 4);
+
+    const { count: activeClientCount, error: clientCountError } = await supabase
+      .from("organization_clients")
+      .select("*", { count: "exact", head: true })
+      .eq("organization_id", organization_id)
+      .eq("status", "active");
+
+    if (clientCountError) {
+      return jsonResponse({ error: clientCountError.message }, 400);
+    }
+
+    if ((activeClientCount ?? 0) >= clientLimit) {
+      return jsonResponse(
+        {
+          error: `This organization has reached its active client limit of ${clientLimit}.`,
+        },
+        403
+      );
+    }
+
     const { data: org } = await supabase
       .from("organizations")
       .select("name")
