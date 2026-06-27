@@ -12,8 +12,8 @@ export default function CoachShell({
 
   return (
     <main className="min-h-screen bg-[#020617] text-white">
-      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-8 lg:grid-cols-[260px_1fr]">
-        <aside className="rounded-3xl border border-slate-800 bg-[#111827] p-6">
+    <div className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[260px_1fr] lg:py-8">
+        <aside className="rounded-3xl border border-slate-800 bg-[#111827] p-4 sm:p-6">
           <Link href="/" className="text-sm font-black text-[#FBBF24]">
             AUREONIQ
           </Link>
@@ -22,7 +22,7 @@ export default function CoachShell({
             Coach
           </p>
 
-          <nav className="mt-8 space-y-3">
+          <nav className="mt-6 grid grid-cols-2 gap-3 lg:mt-8 lg:block lg:space-y-3">
             <CoachNavLink href="/coach" label="Clients" currentPath={pathname} />
             <CoachNavLink href="/coach/team" label="Team" currentPath={pathname} />
             <CoachNavLink href="/coach/billing" label="Billing" currentPath={pathname} />
