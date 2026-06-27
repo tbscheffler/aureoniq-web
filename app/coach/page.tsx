@@ -16,6 +16,8 @@ import QuickActions from "@/components/coach/QuickActions";
 import RecentActivity from "@/components/coach/RecentActivity";
 import CoachMetrics from "@/components/coach/CoachMetrics";
 import InviteClientCard from "@/components/coach/InviteClientCard";
+import PendingInvitations from "@/components/coach/PendingInvitations";
+import ActiveClients from "@/components/coach/ActiveClients";
 
 export default function CoachPage() {
   const [loading, setLoading] = useState(true);
@@ -197,87 +199,12 @@ export default function CoachPage() {
           handleInviteClient={handleInviteClient}
         />
 
-        <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            PENDING INVITATIONS
-          </p>
+        <PendingInvitations
+          invitations={invitations}
+          handleRevokeInvitation={handleRevokeInvitation}
+        />
 
-          {invitations.length === 0 ? (
-            <p className="mt-4 text-slate-400">No pending invitations.</p>
-          ) : (
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              {invitations.map((invite) => (
-                <div
-                  key={invite.id}
-                  className="rounded-2xl border border-slate-700 bg-[#020617] p-5"
-                >
-                  <p className="font-black text-white">
-                    {invite.client_email}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Status: {invite.status}
-                  </p>
-                  <p className="mt-2 text-sm text-slate-400">
-                    Expires: {new Date(invite.expires_at).toLocaleDateString()}
-                  </p>
-                  <button
-                    onClick={() => handleRevokeInvitation(invite.id)}
-                    className="mt-4 rounded-xl border border-red-500/40 px-4 py-2 text-sm font-bold text-red-300 hover:bg-red-500/10"
-                  >
-                    Revoke Invitation
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            ACTIVE CLIENTS
-          </p>
-
-          {clients.length === 0 ? (
-            <p className="mt-4 text-slate-400">No active clients yet.</p>
-          ) : (
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              {clients.map((client) => (
-                <div
-                  key={client.id}
-                  className="rounded-2xl border border-slate-700 bg-[#020617] p-5"
-                >
-                  <p className="text-xl font-black text-white">
-                    {client.client_display_name || "Client"}
-                  </p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-[#FBBF24]/40 bg-[#FBBF24]/10 px-3 py-1 text-xs font-bold text-[#FBBF24]">
-                      {client.sponsored_tier || "Sponsored Access"}
-                    </span>
-
-                    <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-300">
-                      Reports Shared
-                    </span>
-                  </div>
-
-                  <p className="mt-4 text-sm text-slate-400">
-                    Connected{" "}
-                    {client.started_at
-                      ? new Date(client.started_at).toLocaleDateString()
-                      : "recently"}
-                  </p>
-
-                  <Link
-                    href={`/coach/clients/${client.id}`}
-                    className="mt-4 inline-block rounded-xl bg-[#FBBF24] px-4 py-2 text-sm font-black text-[#020617]"
-                  >
-                    Open Workspace
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+<ActiveClients clients={clients} />
       </section>
     </main>
   );
