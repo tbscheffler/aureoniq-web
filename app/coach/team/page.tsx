@@ -8,6 +8,7 @@ import {
   getPendingOrganizationMemberInvitations,
   sendOrganizationMemberInvitation,
 } from "@/services/coachService";
+import CoachShell from "@/components/coach/CoachShell";
 
 export default function CoachTeamPage() {
   const [loading, setLoading] = useState(true);
@@ -90,11 +91,8 @@ export default function CoachTeamPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#020617] text-white">
-      <section className="mx-auto max-w-6xl px-6 py-12">
-        <Link href="/coach" className="text-sm font-bold text-[#FBBF24]">
-          ← Back to Coach Workspace
-        </Link>
+      <CoachShell>
+      <section>
 
         <div className="mt-10">
           <p className="mb-4 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
@@ -224,7 +222,7 @@ export default function CoachTeamPage() {
             )}
           </div>
         </div>
-      </section>
-    </main>
+        </section>
+        </CoachShell>
   );
 }
