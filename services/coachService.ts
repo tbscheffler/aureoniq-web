@@ -273,3 +273,158 @@ export async function getOrganizationClientActionItems(
 
   return data || [];
 }
+
+export async function sendOrganizationMemberInvitation({
+  organizationId,
+  inviteEmail,
+  role,
+}: {
+  organizationId: string;
+  inviteEmail: string;
+  role: "admin" | "coach";
+}) {
+  const { data, error } = await supabase.functions.invoke(
+    "send-organization-member-invitation",
+    {
+      body: {
+        organization_id: organizationId,
+        invite_email: inviteEmail,
+        role,
+      },
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getPendingOrganizationMemberInvitations(
+  organizationId: string
+) {
+  const { data, error } = await supabase
+    .from("organization_member_invitations")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getOrganizationMembers(organizationId: string) {
+  const { data: members, error: membersError } = await supabase
+    .from("organization_members")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .eq("status", "active")
+    .order("created_at", { ascending: true });
+
+  if (membersError) {
+    throw membersError;
+  }
+
+  const userIds = (members || []).map((member) => member.user_id);
+
+  if (userIds.length === 0) {
+    return [];
+  }
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("user_id, display_name, avatar_url")
+    .in("user_id", userIds);
+
+  if (profilesError) {
+    throw profilesError;
+  }
+
+  return (members || []).map((member) => ({
+    ...member,
+    profile: profiles?.find((profile) => profile.user_id === member.user_id) || null,
+  }));
+}
+
+
+export async function getCoachDashboardStats(organizationId: string) {
+  const [
+    { count: activeClients },
+    { count: teamMembers },
+    { count: pendingClientInvites },
+    { count: pendingTeamInvites },
+    { count: notesThisWeek },
+    { count: meetingsThisWeek },
+  ] = await Promise.all([
+    supabase
+      .from("organization_clients")
+      .select("*", { count: "exact", head: true })
+      .eq("organization_id", organizationId)
+      .eq("status", "active"),
+
+    supabase
+      .from("organization_members")
+      .select("*", { count: "exact", head: true })
+      .eq("organization_id", organizationId)
+      .eq("status", "active"),
+
+    supabase
+      .from("organization_invitations")
+      .select("*", { count: "exact", head: true })
+      .eq("organization_id", organizationId)
+      .eq("status", "pending"),
+
+    supabase
+      .from("organization_member_invitations")
+      .select("*", { count: "exact", head: true })
+      .eq("organization_id", organizationId)
+      .eq("status", "pending"),
+
+    supabase
+      .from("organization_client_notes")
+      .select("*", { count: "exact", head: true })
+      .eq("organization_id", organizationId)
+      .gte(
+        "created_at",
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      ),
+
+    supabase
+      .from("organization_client_meetings")
+      .select("*", { count: "exact", head: true })
+      .eq("organization_id", organizationId)
+      .gte(
+        "scheduled_for",
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      ),
+  ]);
+
+  return {
+    activeClients: activeClients ?? 0,
+    teamMembers: teamMembers ?? 0,
+    pendingClientInvites: pendingClientInvites ?? 0,
+    pendingTeamInvites: pendingTeamInvites ?? 0,
+    notesThisWeek: notesThisWeek ?? 0,
+    meetingsThisWeek: meetingsThisWeek ?? 0,
+  };
+}
+
+export async function getCoachRecentActivity(organizationId: string) {
+  const { data, error } = await supabase
+    .from("access_audit_log")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false })
+    .limit(8);
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}

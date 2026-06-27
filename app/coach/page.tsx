@@ -7,9 +7,15 @@ import {
   getOrganizationPlan,
   getOrganizationClients,
   getPendingInvitations,
+  getCoachDashboardStats,
+  getCoachRecentActivity,
   sendOrganizationInvitation,
   revokeOrganizationInvitation,
 } from "@/services/coachService";
+import QuickActions from "@/components/coach/QuickActions";
+import RecentActivity from "@/components/coach/RecentActivity";
+import CoachMetrics from "@/components/coach/CoachMetrics";
+import InviteClientCard from "@/components/coach/InviteClientCard";
 
 export default function CoachPage() {
   const [loading, setLoading] = useState(true);
@@ -19,6 +25,8 @@ export default function CoachPage() {
   const [invitations, setInvitations] = useState<any[]>([]);
   const [clientEmail, setClientEmail] = useState("");
   const [sendingInvite, setSendingInvite] = useState(false);
+  const [stats, setStats] = useState<any>(null);
+  const [activity, setActivity] = useState<any[]>([]);
 
   async function loadCoachDashboard() {
     try {
@@ -29,16 +37,21 @@ export default function CoachPage() {
         ? membership.organizations[0]
         : membership.organizations;
 
-      const [planData, clientData, inviteData] = await Promise.all([
-        getOrganizationPlan(organizationId),
-        getOrganizationClients(organizationId),
-        getPendingInvitations(organizationId),
-      ]);
+        const [planData, clientData, inviteData, statsData, activityData] =
+        await Promise.all([
+          getOrganizationPlan(organizationId),
+          getOrganizationClients(organizationId),
+          getPendingInvitations(organizationId),
+          getCoachDashboardStats(organizationId),
+          getCoachRecentActivity(organizationId),
+        ]);
 
       setOrganization(orgData);
       setPlan(planData);
       setClients(clientData || []);
       setInvitations(inviteData || []);
+      setStats(statsData);
+      setActivity(activityData || []);
       setLoading(false);
     } catch (error: any) {
       console.log("LOAD COACH DASHBOARD ERROR:", error.message);
@@ -110,7 +123,7 @@ export default function CoachPage() {
     );
   }
 
-  const clientLimit = plan?.managed_client_limit || 0;
+  const clientLimit = Number(plan?.managed_client_limit ?? 4);
   const activeClients = clients.length;
 
   return (
@@ -160,45 +173,29 @@ export default function CoachPage() {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          <MetricCard title="Plan" value={plan?.plan_type || "Not set"} />
-          <MetricCard
-            title="Active Clients"
-            value={`${activeClients} / ${clientLimit}`}
-          />
-          <MetricCard
-            title="Sponsored Tier"
-            value={plan?.sponsored_tier || "None"}
-          />
-        </div>
+        <CoachMetrics
+          activeClients={stats?.activeClients ?? activeClients}
+          clientLimit={clientLimit}
+          teamMembers={stats?.teamMembers ?? 0}
+          pendingInvites={
+            (stats?.pendingClientInvites ?? 0) +
+            (stats?.pendingTeamInvites ?? 0)
+          }
+          notesThisWeek={stats?.notesThisWeek ?? 0}
+          meetingsThisWeek={stats?.meetingsThisWeek ?? 0}
+          planName={plan?.plan_type || "Free Beta"}
+        />
 
-        <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            INVITE CLIENT
-          </p>
+        <QuickActions />
 
-          <div className="mt-6 flex flex-col gap-4 md:flex-row">
-            <input
-              className="flex-1 rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
-              placeholder="client@email.com"
-              value={clientEmail}
-              onChange={(e) => setClientEmail(e.target.value)}
-            />
+        <RecentActivity activity={activity} />
 
-            <button
-              onClick={handleInviteClient}
-              disabled={sendingInvite}
-              className="rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617] disabled:opacity-60"
-            >
-              {sendingInvite ? "Creating..." : "Create Invitation"}
-            </button>
-          </div>
-
-          <p className="mt-4 text-sm text-slate-400">
-            This only creates an invitation. The coach gets no report access
-            until the client accepts.
-          </p>
-        </div>
+        <InviteClientCard
+          clientEmail={clientEmail}
+          setClientEmail={setClientEmail}
+          sendingInvite={sendingInvite}
+          handleInviteClient={handleInviteClient}
+        />
 
         <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
           <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
@@ -286,11 +283,4 @@ export default function CoachPage() {
   );
 }
 
-function MetricCard({ title, value }: { title: string; value: any }) {
-  return (
-    <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
-      <p className="text-sm font-bold text-slate-400">{title}</p>
-      <p className="mt-4 text-3xl font-black text-[#FBBF24]">{value}</p>
-    </div>
-  );
-}
+
