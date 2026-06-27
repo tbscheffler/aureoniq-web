@@ -1,13 +1,9 @@
+import CoachShell from "@/components/coach/CoachShell";
+
 export default function CoachSettingsPage() {
     return (
-      <main className="min-h-screen bg-[#020617] text-white">
-        <section className="mx-auto max-w-5xl px-6 py-12">
-          <a
-            href="/coach"
-            className="text-sm font-bold text-[#FBBF24]"
-          >
-            ← Back to Coach Workspace
-          </a>
+      <CoachShell>
+      <section>
   
           <p className="mt-10 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
             ORGANIZATION SETTINGS
@@ -44,8 +40,8 @@ export default function CoachSettingsPage() {
               description="Audit log and access settings."
             />
           </div>
-        </section>
-      </main>
+          </section>
+          </CoachShell>
     );
   }
   
