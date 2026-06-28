@@ -54,7 +54,7 @@ export async function getOrganizationPlan(organizationId: string) {
    * Returns active clients for an organization.
    */
   export async function getOrganizationClients(organizationId: string) {
-    const { data, error } = await supabase
+    const { data: clients, error } = await supabase
       .from("organization_clients")
       .select("*")
       .eq("organization_id", organizationId)
@@ -64,7 +64,29 @@ export async function getOrganizationPlan(organizationId: string) {
       throw error;
     }
   
-    return data || [];
+    const clientUserIds = Array.from(
+      new Set((clients || []).map((client) => client.client_user_id).filter(Boolean))
+    );
+  
+    if (clientUserIds.length === 0) {
+      return clients || [];
+    }
+  
+    const { data: profiles, error: profilesError } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, avatar_url")
+      .in("user_id", clientUserIds);
+  
+    if (profilesError) {
+      throw profilesError;
+    }
+  
+    return (clients || []).map((client) => ({
+      ...client,
+      client_profile:
+        profiles?.find((profile) => profile.user_id === client.client_user_id) ||
+        null,
+    }));
   }
   
   /**
