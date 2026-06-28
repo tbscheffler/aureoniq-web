@@ -657,3 +657,23 @@ export async function getNextOrganizationClientMeeting(
 
   return futureMeetings[0] || null;
 }
+
+export async function getResumeSignedUrl(resumeFilePath: string) {
+  if (!resumeFilePath) {
+    throw new Error("Resume file path is missing.");
+  }
+
+  const cleanPath = resumeFilePath.startsWith("resumes/")
+    ? resumeFilePath.replace("resumes/", "")
+    : resumeFilePath;
+
+  const { data, error } = await supabase.storage
+    .from("resumes")
+    .createSignedUrl(cleanPath, 60 * 10);
+
+  if (error) {
+    throw error;
+  }
+
+  return data.signedUrl;
+}

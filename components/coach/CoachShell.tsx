@@ -37,7 +37,7 @@ export default function CoachShell({
   return (
     <main className="min-h-screen bg-[#020617] text-white">
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[260px_1fr] lg:py-8">
-        <aside className="rounded-3xl border border-slate-800 bg-[#111827] p-4 sm:p-6">
+    <aside className="rounded-3xl border border-slate-800 bg-[#111827] p-4 sm:p-6 lg:sticky lg:top-6 lg:self-start">
           <Link href="/" className="text-sm font-black text-[#FBBF24]">
             AUREONIQ
           </Link>

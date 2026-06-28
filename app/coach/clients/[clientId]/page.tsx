@@ -22,6 +22,7 @@ import ClientOverview from "@/components/coach/ClientOverview";
 import { getCareerIntelligenceSummary } from "@/services/careerIntelligenceService";
 import CoachReportViewer from "@/components/coach/CoachReportViewer";
 import CoachAIQViewer from "@/components/coach/CoachAIQViewer";
+import ResumeReview from "@/components/coach/ResumeReview";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -39,6 +40,7 @@ export default function CoachClientWorkspacePage() {
       try {
         const data = await getCoachClientSummary(clientId);
         setWorkspace(data);
+
         const actionCount = await getOpenOrganizationClientActionItemCount(clientId);
         setOpenActionItems(actionCount);
         const nextMeetingData = await getNextOrganizationClientMeeting(clientId);
@@ -78,7 +80,7 @@ export default function CoachClientWorkspacePage() {
   return (
     <CoachShell>
     <section>
-      <ClientWorkspaceHeader client={workspace?.client} />
+    <ClientWorkspaceHeader client={workspace?.client} />
 
         {/* <div className="mt-10 grid gap-6 md:grid-cols-3">
           <MetricCard title="Discovery Reports" value={careerReports.length} />
@@ -89,13 +91,16 @@ export default function CoachClientWorkspacePage() {
           />
         </div> */}
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-[280px_1fr]">
-          <ClientWorkspaceSidebar
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-          />
+        <div className="mt-10 grid gap-8 lg:grid-cols-[240px_1fr]">
+          <div className="lg:sticky lg:top-6 lg:self-start">
+            <ClientWorkspaceSidebar
+              activeSection={activeSection}
+              setActiveSection={setActiveSection}
+            />
+          </div>
 
-          <div className="space-y-8">
+  <div className="space-y-8">
+
           {activeSection === "overview" ? (
           <ClientOverview
                 clientName={
@@ -133,6 +138,10 @@ export default function CoachClientWorkspacePage() {
 
             {activeSection === "aiq" ? (
               <CoachAIQViewer reports={aiqReports} />
+            ) : null}
+
+            {activeSection === "resume" ? (
+              <ResumeReview resumeProfile={workspace?.resume_profile} />
             ) : null}
 
             {activeSection === "timeline" ? (

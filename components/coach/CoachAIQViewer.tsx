@@ -2,6 +2,7 @@ import DashboardCard from "@/components/coach/DashboardCard";
 import SummaryMetric from "@/components/coach/reports/SummaryMetric";
 import GrowthAccelerators from "@/components/coach/reports/GrowthAccelerators";
 import FutureGrowthScenarios from "@/components/coach/reports/FutureGrowthScenarios";
+import WhyFutureFits from "@/components/coach/reports/WhyFutureFits";
 
 type CoachAIQViewerProps = {
   reports: any[];
@@ -58,6 +59,7 @@ export default function CoachAIQViewer({ reports }: CoachAIQViewerProps) {
           </div>
           <GrowthAccelerators report={report} />
           <FutureGrowthScenarios report={report} />
+          <WhyFutureFits report={report} />
         </>
       )}
     </DashboardCard>

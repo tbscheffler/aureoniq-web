@@ -20,6 +20,11 @@ const sections = [
     description: "AIQ career intelligence report",
   },
   {
+    key: "resume",
+    label: "Resume Review",
+    description: "Review resume strengths and improvement areas",
+  },
+  {
     key: "timeline",
     label: "Career Journey",
     description: "Progress and activity over time",
