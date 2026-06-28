@@ -493,3 +493,62 @@ export async function markOrganizationNotificationRead(notificationId: string) {
     throw error;
   }
 }
+
+export async function getCoachAgendaStats(organizationId: string) {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const { count: meetingsToday, error: meetingsError } = await supabase
+    .from("organization_client_meetings")
+    .select("*", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .gte("meeting_date", todayStart.toISOString())
+    .lte("meeting_date", todayEnd.toISOString());
+
+  if (meetingsError) {
+    throw meetingsError;
+  }
+
+  const todayDate = todayStart.toISOString().slice(0, 10);
+
+  const { count: overdueActions, error: actionsError } = await supabase
+    .from("organization_client_action_items")
+    .select("*", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .lt("due_date", todayDate)
+    .neq("status", "completed");
+
+  if (actionsError) {
+    throw actionsError;
+  }
+
+  return {
+    meetingsToday: meetingsToday ?? 0,
+    overdueActions: overdueActions ?? 0,
+  };
+}
+
+export async function getTodaysCoachMeetings(organizationId: string) {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const { data, error } = await supabase
+    .from("organization_client_meetings")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .gte("meeting_date", todayStart.toISOString())
+    .lte("meeting_date", todayEnd.toISOString())
+    .order("meeting_date", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}

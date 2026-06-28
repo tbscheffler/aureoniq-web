@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   getCurrentOrganization,
   getOrganizationPlan,
@@ -11,6 +10,8 @@ import {
   getCoachRecentActivity,
   sendOrganizationInvitation,
   revokeOrganizationInvitation,
+  getCoachAgendaStats,
+  getTodaysCoachMeetings,
 } from "@/services/coachService";
 import QuickActions from "@/components/coach/QuickActions";
 import RecentActivity from "@/components/coach/RecentActivity";
@@ -20,6 +21,8 @@ import PendingInvitations from "@/components/coach/PendingInvitations";
 import ActiveClients from "@/components/coach/ActiveClients";
 import SeatUsageCard from "@/components/coach/SeatUsageCard";
 import CoachShell from "@/components/coach/CoachShell";
+import CoachDashboardHeader from "@/components/coach/CoachDashboardHeader";
+import TodaysAgenda from "@/components/coach/TodaysAgenda";
 
 export default function CoachPage() {
   const [loading, setLoading] = useState(true);
@@ -31,6 +34,8 @@ export default function CoachPage() {
   const [sendingInvite, setSendingInvite] = useState(false);
   const [stats, setStats] = useState<any>(null);
   const [activity, setActivity] = useState<any[]>([]);
+  const [agendaStats, setAgendaStats] = useState<any>(null);
+  const [todaysMeetings, setTodaysMeetings] = useState<any[]>([]);
 
   async function loadCoachDashboard() {
     try {
@@ -41,13 +46,22 @@ export default function CoachPage() {
         ? membership.organizations[0]
         : membership.organizations;
 
-        const [planData, clientData, inviteData, statsData, activityData] =
-        await Promise.all([
+        const [
+          planData,
+          clientData,
+          inviteData,
+          statsData,
+          activityData,
+          agendaData,
+          todaysMeetingsData,
+        ] = await Promise.all([
           getOrganizationPlan(organizationId),
           getOrganizationClients(organizationId),
           getPendingInvitations(organizationId),
           getCoachDashboardStats(organizationId),
           getCoachRecentActivity(organizationId),
+          getCoachAgendaStats(organizationId),
+          getTodaysCoachMeetings(organizationId),
         ]);
 
       setOrganization(orgData);
@@ -56,10 +70,12 @@ export default function CoachPage() {
       setInvitations(inviteData || []);
       setStats(statsData);
       setActivity(activityData || []);
+      setAgendaStats(agendaData);
+      setTodaysMeetings(todaysMeetingsData || []);
       setLoading(false);
     } catch (error: any) {
-      console.log("LOAD COACH DASHBOARD ERROR:", error.message);
-      window.location.href = "/dashboard";
+      console.error(error);
+      alert(error.message);
     }
   }
 
@@ -136,52 +152,15 @@ export default function CoachPage() {
     <CoachShell>
     <section>
 
-        <div className="mt-10 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="mb-4 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-              COACH WORKSPACE
-            </p>
+    <CoachDashboardHeader
+        organizationName={organization?.name || "Coach Workspace"}
+        planName={plan?.plan_type || "Free Beta"}
+      />
 
-            <h1 className="text-5xl font-black">
-              {organization?.name || "Coach Workspace"}
-            </h1>
-
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">
-              Invite clients, manage active relationships, and review career
-              intelligence only after client consent.
-            </p>
-          </div>
-
-          {/* <div className="flex flex-wrap gap-3">
-            <Link
-              href="/coach"
-              className="rounded-2xl bg-[#FBBF24] px-5 py-3 font-black text-[#020617]"
-            >
-              Clients
-            </Link>
-
-            <Link
-              href="/coach/team"
-              className="rounded-2xl border border-slate-700 bg-[#111827] px-5 py-3 font-black text-white hover:border-[#FBBF24]"
-            >
-              Team
-            </Link>
-
-            <Link
-              href="/coach/billing"
-              className="rounded-2xl border border-slate-700 bg-[#111827] px-5 py-3 font-black text-white hover:border-[#FBBF24]"
-            >
-              Billing
-            </Link>
-
-            <Link
-              href="/coach/settings"
-              className="rounded-2xl border border-slate-700 bg-[#111827] px-5 py-3 font-black text-white hover:border-[#FBBF24]"
-            >
-              Settings
-            </Link>
-          </div> */}
-        </div>
+        <TodaysAgenda
+          meetings={todaysMeetings}
+          overdueActions={agendaStats?.overdueActions ?? 0}
+        />
 
         <CoachMetrics
           activeClients={stats?.activeClients ?? activeClients}
@@ -202,9 +181,11 @@ export default function CoachPage() {
           planName={plan?.plan_type || "free_beta"}
         />
 
-        <QuickActions />
+        <div className="mt-8 grid gap-6 lg:grid-cols-[380px_1fr]">
+          <QuickActions />
 
-        <RecentActivity activity={activity} />
+          <RecentActivity activity={activity} />
+        </div>
 
         <InviteClientCard
           clientEmail={clientEmail}

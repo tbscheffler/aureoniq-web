@@ -2,15 +2,20 @@ import Link from "next/link";
 
 export default function QuickActions() {
   return (
-    <div className="mt-10">
-      <h2 className="text-xl font-black text-white">
-        Quick Actions
+    <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
+      <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+        QUICK ACTIONS
+      </p>
+
+      <h2 className="mt-3 text-2xl font-black text-white">
+        Get Started
       </h2>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 grid gap-4">
+        
 
         <ActionCard
-          href="/coach/clients"
+          href="/coach"
           emoji="👤"
           title="Invite Client"
           description="Add a new client to your organization."
@@ -24,14 +29,14 @@ export default function QuickActions() {
         />
 
         <ActionCard
-          href="/coach/notes"
+          href="/coach"
           emoji="📝"
           title="Coach Notes"
           description="Review and update coaching notes."
         />
 
         <ActionCard
-          href="/coach/meetings"
+          href="/coach"
           emoji="📅"
           title="Meetings"
           description="Manage upcoming coaching sessions."
@@ -56,17 +61,14 @@ function ActionCard({
   return (
     <Link
       href={href}
-      className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:border-[#FBBF24]"
+      className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 transition hover:border-[#FBBF24]"
     >
       <p className="text-3xl">{emoji}</p>
 
-      <p className="mt-4 font-black text-white">
-        {title}
-      </p>
-
-      <p className="mt-2 text-sm text-slate-400">
-        {description}
-      </p>
+      <div>
+        <p className="font-black text-white">{title}</p>
+        <p className="mt-1 text-sm text-slate-400">{description}</p>
+      </div>
     </Link>
   );
 }
