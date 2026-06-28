@@ -13,6 +13,9 @@ import {
   MeetingHistorySection,
   ActionPlanSection,
 } from "@/components/coach";
+import ClientWorkspaceHeader from "@/components/coach/ClientWorkspaceHeader";
+import CoachShell from "@/components/coach/CoachShell";
+import ClientTimeline from "@/components/coach/ClientTimeline";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -61,24 +64,9 @@ export default function CoachClientWorkspacePage() {
   const aiqReports = workspace?.aiq_reports || [];
 
   return (
-    <main className="min-h-screen bg-[#020617] text-white">
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <a href="/coach" className="text-sm font-bold text-[#FBBF24]">
-          ← Back to Coach Workspace
-        </a>
-
-        <div className="mt-10">
-          <p className="mb-4 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            CLIENT WORKSPACE
-          </p>
-
-          <h1 className="text-5xl font-black">Client Career Intelligence</h1>
-
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">
-            Review this client’s shared AureonIQ reports. Reports are read-only.
-            Coaching notes and action plans will live here next.
-          </p>
-        </div>
+    <CoachShell>
+    <section>
+      <ClientWorkspaceHeader client={workspace?.client} />
 
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           <MetricCard title="Discovery Reports" value={careerReports.length} />
@@ -104,6 +92,10 @@ export default function CoachClientWorkspacePage() {
               <ReportSection title="AIQ Reports" reports={aiqReports} />
             ) : null}
 
+            {activeSection === "timeline" ? (
+              <ClientTimeline events={[]} />
+            ) : null}
+
             {activeSection === "notes" ? (
               <CoachNotesSection organizationClientId={clientId} />
             ) : null}
@@ -117,8 +109,8 @@ export default function CoachClientWorkspacePage() {
             ) : null}
           </div>
         </div>
-      </section>
-    </main>
+        </section>
+        </CoachShell>
   );
 }
 
