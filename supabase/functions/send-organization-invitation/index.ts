@@ -185,6 +185,20 @@ serve(async (req) => {
       },
     });
 
+    const normalizedClientEmail = client_email.trim().toLowerCase();
+
+    await supabase.from("organization_notifications").insert({
+      organization_id,
+      actor_user_id: user.id,
+      type: "client_invitation_sent",
+      title: "Client invitation sent",
+      message: `An invitation was sent to ${normalizedClientEmail}.`,
+      metadata: {
+        invitation_id: invitation.id,
+        client_email: normalizedClientEmail,
+      },
+    });
+
     return jsonResponse({ success: true });
   } catch (error) {
     return jsonResponse(
