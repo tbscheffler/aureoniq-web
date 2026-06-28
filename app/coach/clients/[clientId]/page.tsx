@@ -141,7 +141,10 @@ export default function CoachClientWorkspacePage() {
             ) : null}
 
             {activeSection === "resume" ? (
-              <ResumeReview resumeProfile={workspace?.resume_profile} />
+              <ResumeReview
+              resumeProfile={workspace?.resume_profile}
+              organizationClientId={clientId}
+            />
             ) : null}
 
             {activeSection === "timeline" ? (

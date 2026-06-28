@@ -677,3 +677,42 @@ export async function getResumeSignedUrl(resumeFilePath: string) {
 
   return data.signedUrl;
 }
+
+export async function generateOrganizationClientResumeReview(
+  organizationClientId: string
+) {
+  const { data, error } = await supabase.functions.invoke(
+    "generate-resume-review",
+    {
+      body: {
+        organization_client_id: organizationClientId,
+      },
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  if (data?.error) {
+    throw new Error(data.error);
+  }
+
+  return data;
+}
+
+export async function getOrganizationClientResumeReviews(
+  organizationClientId: string
+) {
+  const { data, error } = await supabase
+    .from("organization_client_resume_reviews")
+    .select("*")
+    .eq("organization_client_id", organizationClientId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}

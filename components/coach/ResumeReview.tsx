@@ -1,11 +1,23 @@
+"use client";
+
+import { useState } from "react";
 import DashboardCard from "@/components/coach/DashboardCard";
-import { getResumeSignedUrl } from "@/services/coachService";
+import {
+  getResumeSignedUrl,
+  generateOrganizationClientResumeReview,
+} from "@/services/coachService";
 
 type ResumeReviewProps = {
-  resumeProfile: any;
-};
+    resumeProfile: any;
+    organizationClientId: string;
+  };
 
-export default function ResumeReview({ resumeProfile }: ResumeReviewProps) {
+  export default function ResumeReview({
+    resumeProfile,
+    organizationClientId,
+  }: ResumeReviewProps) {
+    const [analyzing, setAnalyzing] = useState(false);
+    const [reviewResult, setReviewResult] = useState<any>(null);
   if (!resumeProfile) {
     return (
       <DashboardCard eyebrow="RESUME REVIEW" title="No Resume Available">
@@ -93,11 +105,46 @@ export default function ResumeReview({ resumeProfile }: ResumeReviewProps) {
         
 
         <button
-          disabled
-          className="mt-6 rounded-2xl bg-[#FBBF24]/20 px-5 py-3 font-black text-[#FBBF24]"
-        >
-          Analyze Resume Coming Soon
-        </button>
+            onClick={async () => {
+                try {
+                setAnalyzing(true);
+
+                const result = await generateOrganizationClientResumeReview(
+                    organizationClientId
+                );
+
+                setReviewResult(result.review?.review_json || result.review || result);
+                alert("Resume review test completed.");
+                } catch (error: any) {
+                alert(error.message || "Unable to analyze resume.");
+                } finally {
+                setAnalyzing(false);
+                }
+            }}
+            disabled={analyzing}
+            className="mt-6 rounded-2xl bg-[#FBBF24] px-5 py-3 font-black text-[#020617] disabled:opacity-60"
+            >
+            {analyzing ? "Analyzing..." : "Analyze Resume"}
+            </button>
+
+            {reviewResult ? (
+            <div className="mt-6 space-y-6">
+                <div className="rounded-2xl border border-slate-700 bg-[#111827] p-5">
+                <p className="text-sm font-bold text-slate-400">Overall Score</p>
+                <p className="mt-2 text-4xl font-black text-[#FBBF24]">
+                    {reviewResult.overallScore ?? "N/A"}
+                </p>
+                <p className="mt-4 leading-7 text-slate-300">
+                    {reviewResult.summary}
+                </p>
+                </div>
+
+                <ResumeReviewList title="Strengths" items={reviewResult.strengths} />
+                <ResumeReviewList title="Improvement Areas" items={reviewResult.improvementAreas} />
+                <ResumeReviewList title="ATS Concerns" items={reviewResult.atsConcerns} />
+                <ResumeReviewList title="Suggested Edits" items={reviewResult.suggestedEdits} />
+            </div>
+            ) : null}
       </div>
     </DashboardCard>
   );
@@ -114,3 +161,42 @@ function ResumeField({ label, value }: { label: string; value: any }) {
     </div>
   );
 }
+
+function ResumeReviewList({ title, items }: { title: string; items?: any[] }) {
+    if (!items || items.length === 0) return null;
+  
+    return (
+      <div className="rounded-2xl border border-slate-700 bg-[#111827] p-5">
+        <p className="text-sm font-black tracking-[0.2em] text-slate-500">
+          {title.toUpperCase()}
+        </p>
+  
+        <div className="mt-4 space-y-4">
+          {items.map((item, index) => (
+            <div
+              key={index}
+              className="rounded-2xl border border-slate-700 bg-[#020617] p-4"
+            >
+              <p className="font-black text-white">
+                {item.title || item.section || `Item ${index + 1}`}
+              </p>
+  
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                {item.evidence ||
+                  item.whyItMatters ||
+                  item.details ||
+                  item.currentIssue ||
+                  ""}
+              </p>
+  
+              {item.suggestedDirection ? (
+                <p className="mt-3 text-sm leading-6 text-[#FBBF24]">
+                  Suggested direction: {item.suggestedDirection}
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
