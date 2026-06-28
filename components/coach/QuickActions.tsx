@@ -1,15 +1,9 @@
 import Link from "next/link";
+import DashboardCard from "@/components/coach/DashboardCard";
 
 export default function QuickActions() {
   return (
-    <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
-      <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-        QUICK ACTIONS
-      </p>
-
-      <h2 className="mt-3 text-2xl font-black text-white">
-        Get Started
-      </h2>
+    <DashboardCard eyebrow="QUICK ACTIONS" title="Get Started">
 
       <div className="mt-6 grid gap-4">
         
@@ -43,7 +37,7 @@ export default function QuickActions() {
         />
 
       </div>
-    </div>
+      </DashboardCard>
   );
 }
 

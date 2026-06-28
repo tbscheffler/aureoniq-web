@@ -1,21 +1,12 @@
+import DashboardCard from "@/components/coach/DashboardCard";
+
 type RecentActivityProps = {
   activity: any[];
 };
 
 export default function RecentActivity({ activity }: RecentActivityProps) {
   return (
-    <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            RECENT ACTIVITY
-          </p>
-
-          <h2 className="mt-3 text-2xl font-black text-white">
-            Workspace Activity
-          </h2>
-        </div>
-      </div>
+    <DashboardCard eyebrow="RECENT ACTIVITY" title="Workspace Activity">
 
       {activity.length === 0 ? (
         <p className="mt-6 text-slate-400">No recent activity yet.</p>
@@ -37,7 +28,7 @@ export default function RecentActivity({ activity }: RecentActivityProps) {
           ))}
         </div>
       )}
-    </div>
+    </DashboardCard>
   );
 }
 
