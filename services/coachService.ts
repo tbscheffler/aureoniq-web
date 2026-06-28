@@ -734,3 +734,52 @@ export async function getLatestOrganizationClientResumeReview(
 
   return data;
 }
+
+export async function getResumeReviewFindingNotes(resumeReviewId: string) {
+  const { data, error } = await supabase
+    .from("organization_client_resume_review_notes")
+    .select("*")
+    .eq("resume_review_id", resumeReviewId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function saveResumeReviewFindingNote({
+  resumeReviewId,
+  findingKey,
+  coachNote,
+  status = "open",
+}: {
+  resumeReviewId: string;
+  findingKey: string;
+  coachNote: string;
+  status?: string;
+}) {
+  const { data, error } = await supabase
+    .from("organization_client_resume_review_notes")
+    .upsert(
+      {
+        resume_review_id: resumeReviewId,
+        finding_key: findingKey,
+        coach_note: coachNote,
+        status,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "resume_review_id,finding_key",
+      }
+    )
+    .select("*")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
