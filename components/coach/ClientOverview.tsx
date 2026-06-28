@@ -32,16 +32,25 @@ export default function ClientOverview({
 
     <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
+        <div className="flex items-start justify-between gap-4">
         <p className="text-5xl font-black text-white">
-        {intelligence.careerHealth}%
+            {intelligence.careerHealth}%
         </p>
+
+        <HealthBadge riskLevel={intelligence.riskLevel} />
+        </div>
 
         <ProgressBar value={intelligence.careerHealth} />
 
         <p className="mt-3 text-sm text-slate-300">
-        Momentum: {intelligence.careerMomentum} · Risk:{" "}
-        {intelligence.riskLevel}
-        </p>
+            Momentum: {intelligence.careerMomentum} · Risk:{" "}
+            {intelligence.riskLevel}
+            </p>
+
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-400">
+            Career Health estimates how complete and active this client’s career
+            intelligence profile is based on reports, meetings, and open action items.
+            </p>
         </div>
 
         <div className="max-w-xl rounded-2xl border border-slate-700 bg-[#020617] p-4">
@@ -184,4 +193,30 @@ function formatMeetingDate(dateValue: string) {
       hour: "numeric",
       minute: "2-digit",
     });
+  }
+
+  function HealthBadge({
+    riskLevel,
+  }: {
+    riskLevel: "Low" | "Medium" | "High";
+  }) {
+    const label =
+      riskLevel === "Low"
+        ? "On Track"
+        : riskLevel === "Medium"
+        ? "Needs Attention"
+        : "High Priority";
+  
+    const className =
+      riskLevel === "Low"
+        ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-300"
+        : riskLevel === "Medium"
+        ? "border-[#FBBF24]/40 bg-[#FBBF24]/10 text-[#FBBF24]"
+        : "border-red-400/40 bg-red-400/10 text-red-300";
+  
+    return (
+      <span className={`rounded-full border px-4 py-2 text-xs font-black ${className}`}>
+        {label}
+      </span>
+    );
   }

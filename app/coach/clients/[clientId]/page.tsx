@@ -20,6 +20,7 @@ import CoachShell from "@/components/coach/CoachShell";
 import ClientTimeline from "@/components/coach/ClientTimeline";
 import ClientOverview from "@/components/coach/ClientOverview";
 import { getCareerIntelligenceSummary } from "@/services/careerIntelligenceService";
+import CoachReportViewer from "@/components/coach/CoachReportViewer";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -122,7 +123,11 @@ export default function CoachClientWorkspacePage() {
             ) : null}
 
             {activeSection === "discovery" ? (
-              <ReportSection title="Career Discovery Reports" reports={careerReports} />
+              <CoachReportViewer
+                title="Career Assessment"
+                summary="This report highlights the client's strongest career paths, transferable skills, hidden opportunities, and recommended areas for growth."
+                reports={careerReports}
+              />
             ) : null}
 
             {activeSection === "aiq" ? (
