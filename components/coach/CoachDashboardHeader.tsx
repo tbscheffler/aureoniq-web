@@ -15,9 +15,13 @@ type CoachDashboardHeaderProps = {
   
         <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-4xl font-black md:text-5xl">
-              {getGreeting()}, {organizationName}
+          <h1 className="text-4xl font-black md:text-5xl">
+            {getGreeting()}
             </h1>
+
+            <p className="mt-3 text-2xl font-black text-[#FBBF24]">
+            {organizationName}
+            </p>
   
             <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">
               Your client command center for career intelligence, coaching notes,
