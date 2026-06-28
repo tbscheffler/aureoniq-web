@@ -19,6 +19,7 @@ import ClientWorkspaceHeader from "@/components/coach/ClientWorkspaceHeader";
 import CoachShell from "@/components/coach/CoachShell";
 import ClientTimeline from "@/components/coach/ClientTimeline";
 import ClientOverview from "@/components/coach/ClientOverview";
+import { getCareerIntelligenceSummary } from "@/services/careerIntelligenceService";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -77,14 +78,14 @@ export default function CoachClientWorkspacePage() {
     <section>
       <ClientWorkspaceHeader client={workspace?.client} />
 
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        {/* <div className="mt-10 grid gap-6 md:grid-cols-3">
           <MetricCard title="Discovery Reports" value={careerReports.length} />
           <MetricCard title="AIQ Reports" value={aiqReports.length} />
           <MetricCard
             title="Access Level"
             value={workspace?.client?.access_level || "shared"}
           />
-        </div>
+        </div> */}
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[280px_1fr]">
           <ClientWorkspaceSidebar
@@ -111,6 +112,12 @@ export default function CoachClientWorkspacePage() {
                       }
                     : null
                 }
+                intelligence={getCareerIntelligenceSummary({
+                  hasDiscoveryReport: careerReports.length > 0,
+                  hasAIQReport: aiqReports.length > 0,
+                  openActionItems,
+                  hasNextMeeting: Boolean(nextMeeting),
+                })}
               />
             ) : null}
 

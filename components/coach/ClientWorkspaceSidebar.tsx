@@ -11,18 +11,18 @@ const sections = [
   },
   {
     key: "discovery",
-    label: "Discovery Reports",
+    label: "Career Assessment",
     description: "Career paths and opportunity analysis",
   },
   {
     key: "aiq",
-    label: "AIQ Reports",
-    description: "Career intelligence and future potential",
+    label: "Future Potential",
+    description: "AIQ career intelligence report",
   },
   {
     key: "timeline",
-    label: "Timeline",
-    description: "Client progress and career journey",
+    label: "Career Journey",
+    description: "Progress and activity over time",
   },
   {
     key: "notes",
@@ -36,7 +36,7 @@ const sections = [
   },
   {
     key: "actions",
-    label: "Action Items",
+    label: "Action Plan",
     description: "Tasks and next steps",
   },
 ];
@@ -48,7 +48,7 @@ export default function ClientWorkspaceSidebar({
   return (
     <div className="rounded-3xl border border-slate-800 bg-[#111827] p-5">
       <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-        CLIENT RECORD
+        CAREER INTELLIGENCE
       </p>
 
       <div className="mt-6 space-y-3">
