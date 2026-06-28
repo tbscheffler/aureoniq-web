@@ -21,6 +21,7 @@ import ClientTimeline from "@/components/coach/ClientTimeline";
 import ClientOverview from "@/components/coach/ClientOverview";
 import { getCareerIntelligenceSummary } from "@/services/careerIntelligenceService";
 import CoachReportViewer from "@/components/coach/CoachReportViewer";
+import CoachAIQViewer from "@/components/coach/CoachAIQViewer";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -131,11 +132,7 @@ export default function CoachClientWorkspacePage() {
             ) : null}
 
             {activeSection === "aiq" ? (
-              <CoachReportViewer
-                title="Future Potential"
-                summary="This report helps the coach review the client's future career potential, opportunity index, growth accelerators, alternative paths, and long-term positioning."
-                reports={aiqReports}
-              />
+              <CoachAIQViewer reports={aiqReports} />
             ) : null}
 
             {activeSection === "timeline" ? (
