@@ -716,3 +716,21 @@ export async function getOrganizationClientResumeReviews(
 
   return data || [];
 }
+
+export async function getLatestOrganizationClientResumeReview(
+  organizationClientId: string
+) {
+  const { data, error } = await supabase
+    .from("organization_client_resume_reviews")
+    .select("*")
+    .eq("organization_client_id", organizationClientId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

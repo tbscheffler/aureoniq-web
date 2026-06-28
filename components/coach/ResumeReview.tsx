@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardCard from "@/components/coach/DashboardCard";
 import {
   getResumeSignedUrl,
   generateOrganizationClientResumeReview,
+  getLatestOrganizationClientResumeReview,
 } from "@/services/coachService";
 
 type ResumeReviewProps = {
@@ -18,6 +19,27 @@ type ResumeReviewProps = {
   }: ResumeReviewProps) {
     const [analyzing, setAnalyzing] = useState(false);
     const [reviewResult, setReviewResult] = useState<any>(null);
+    const [loadingReview, setLoadingReview] = useState(true);
+    useEffect(() => {
+        async function loadLatestReview() {
+          try {
+            const latestReview =
+              await getLatestOrganizationClientResumeReview(
+                organizationClientId
+              );
+      
+            if (latestReview) {
+              setReviewResult(latestReview.review_json);
+            }
+          } catch (error) {
+            console.log("LOAD RESUME REVIEW ERROR:", error);
+          } finally {
+            setLoadingReview(false);
+          }
+        }
+      
+        loadLatestReview();
+      }, [organizationClientId]);
   if (!resumeProfile) {
     return (
       <DashboardCard eyebrow="RESUME REVIEW" title="No Resume Available">
@@ -96,10 +118,16 @@ type ResumeReviewProps = {
           AI RESUME REVIEW
         </p>
 
+        {loadingReview ? (
+        <p className="mt-4 text-slate-400">
+            Loading latest resume review...
+        </p>
+        ) : null}
+
         <p className="mt-4 leading-7 text-slate-300">
-          AI resume analysis will appear here. The first version will review the
-          existing resume profile and highlight strengths, improvement areas,
-          ATS concerns, and suggested coach edits.
+        This AI-prepared review helps coaches quickly scan resume strengths,
+        improvement areas, ATS concerns, and suggested edit directions before a
+        client session.
         </p>
 
         
@@ -121,7 +149,7 @@ type ResumeReviewProps = {
                 setAnalyzing(false);
                 }
             }}
-            disabled={analyzing}
+            disabled={analyzing || loadingReview}
             className="mt-6 rounded-2xl bg-[#FBBF24] px-5 py-3 font-black text-[#020617] disabled:opacity-60"
             >
             {analyzing ? "Analyzing..." : "Analyze Resume"}
