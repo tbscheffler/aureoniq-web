@@ -625,3 +625,35 @@ export async function getTodaysCoachMeetings(organizationId: string) {
     };
   });
 }
+
+export async function getOpenOrganizationClientActionItemCount(
+  organizationClientId: string
+) {
+  const { count, error } = await supabase
+    .from("organization_client_action_items")
+    .select("*", { count: "exact", head: true })
+    .eq("organization_client_id", organizationClientId)
+    .neq("status", "completed");
+
+  if (error) {
+    throw error;
+  }
+
+  return count ?? 0;
+}
+
+export async function getNextOrganizationClientMeeting(
+  organizationClientId: string
+) {
+  const meetings = await getOrganizationClientMeetings(organizationClientId);
+  const now = new Date();
+
+  const futureMeetings = (meetings || [])
+    .filter((meeting: any) => new Date(meeting.meeting_date) >= now)
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.meeting_date).getTime() - new Date(b.meeting_date).getTime()
+    );
+
+  return futureMeetings[0] || null;
+}

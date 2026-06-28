@@ -5,6 +5,11 @@ type ClientWorkspaceSidebarProps = {
 
 const sections = [
   {
+    key: "overview",
+    label: "Overview",
+    description: "Client status and next steps",
+  },
+  {
     key: "discovery",
     label: "Discovery Reports",
     description: "Career paths and opportunity analysis",

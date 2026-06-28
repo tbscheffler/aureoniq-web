@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   getCoachClientSummary,
+  getOpenOrganizationClientActionItemCount,
+  getNextOrganizationClientMeeting,
 } from "@/services/coachService";
 import {
   MetricCard,
@@ -16,6 +18,7 @@ import {
 import ClientWorkspaceHeader from "@/components/coach/ClientWorkspaceHeader";
 import CoachShell from "@/components/coach/CoachShell";
 import ClientTimeline from "@/components/coach/ClientTimeline";
+import ClientOverview from "@/components/coach/ClientOverview";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -24,13 +27,19 @@ export default function CoachClientWorkspacePage() {
     const [loading, setLoading] = useState(true);
     const [workspace, setWorkspace] = useState<any>(null);
     const [error, setError] = useState("");
-    const [activeSection, setActiveSection] = useState("discovery");
+    const [activeSection, setActiveSection] = useState("overview");
+    const [openActionItems, setOpenActionItems] = useState(0);
+    const [nextMeeting, setNextMeeting] = useState<any>(null);
 
   useEffect(() => {
     async function loadWorkspace() {
       try {
         const data = await getCoachClientSummary(clientId);
         setWorkspace(data);
+        const actionCount = await getOpenOrganizationClientActionItemCount(clientId);
+        setOpenActionItems(actionCount);
+        const nextMeetingData = await getNextOrganizationClientMeeting(clientId);
+        setNextMeeting(nextMeetingData);
       } catch (err: any) {
         setError(err.message || "Unable to load client workspace.");
       } finally {
@@ -84,6 +93,27 @@ export default function CoachClientWorkspacePage() {
           />
 
           <div className="space-y-8">
+          {activeSection === "overview" ? (
+          <ClientOverview
+                clientName={
+                  workspace?.client?.client_profile?.display_name ||
+                  workspace?.client?.client_email ||
+                  "Client"
+                }
+                hasDiscoveryReport={careerReports.length > 0}
+                hasAIQReport={aiqReports.length > 0}
+                openActionItems={openActionItems}
+                nextMeeting={
+                  nextMeeting
+                    ? {
+                        title: nextMeeting.title,
+                        meetingDate: nextMeeting.meeting_date,
+                      }
+                    : null
+                }
+              />
+            ) : null}
+
             {activeSection === "discovery" ? (
               <ReportSection title="Career Discovery Reports" reports={careerReports} />
             ) : null}
