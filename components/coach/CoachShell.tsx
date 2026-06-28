@@ -23,10 +23,11 @@ export default function CoachShell({
           </p>
 
           <nav className="mt-6 grid grid-cols-2 gap-3 lg:mt-8 lg:block lg:space-y-3">
-            <CoachNavLink href="/coach" label="Clients" currentPath={pathname} />
-            <CoachNavLink href="/coach/team" label="Team" currentPath={pathname} />
-            <CoachNavLink href="/coach/billing" label="Billing" currentPath={pathname} />
-            <CoachNavLink href="/coach/settings" label="Settings" currentPath={pathname} />
+          <CoachNavLink href="/coach" label="Clients" currentPath={pathname} />
+        <CoachNavLink href="/coach/team" label="Team" currentPath={pathname} />
+        <CoachNavLink href="/coach/notifications" label="Notifications" currentPath={pathname} />
+        <CoachNavLink href="/coach/billing" label="Billing" currentPath={pathname} />
+        <CoachNavLink href="/coach/settings" label="Settings" currentPath={pathname} />
           </nav>
         </aside>
 
