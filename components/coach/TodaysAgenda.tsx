@@ -32,6 +32,11 @@ type TodaysAgendaProps = {
                 {meetings.map((meeting) => (
                     <div key={meeting.id} className="border-t border-slate-800 pt-4 first:border-t-0 first:pt-0">
                     <p className="font-black text-white">{meeting.title}</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                    {meeting.client_profile?.display_name ||
+                        meeting.client?.client_email ||
+                        "Client"}
+                    </p>
                     <p className="mt-1 text-sm text-[#FBBF24]">
                         {new Date(meeting.meeting_date).toLocaleTimeString([], {
                         hour: "numeric",

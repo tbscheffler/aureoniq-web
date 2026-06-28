@@ -538,7 +538,7 @@ export async function getTodaysCoachMeetings(organizationId: string) {
   const todayEnd = new Date();
   todayEnd.setHours(23, 59, 59, 999);
 
-  const { data, error } = await supabase
+  const { data: meetings, error } = await supabase
     .from("organization_client_meetings")
     .select("*")
     .eq("organization_id", organizationId)
@@ -550,5 +550,56 @@ export async function getTodaysCoachMeetings(organizationId: string) {
     throw error;
   }
 
-  return data || [];
+  const organizationClientIds = Array.from(
+    new Set(
+      (meetings || [])
+        .map((meeting) => meeting.organization_client_id)
+        .filter(Boolean)
+    )
+  );
+
+  if (organizationClientIds.length === 0) {
+    return meetings || [];
+  }
+
+  const { data: clients, error: clientsError } = await supabase
+    .from("organization_clients")
+    .select("id, client_user_id, client_email")
+    .in("id", organizationClientIds);
+
+  if (clientsError) {
+    throw clientsError;
+  }
+
+  const clientUserIds = Array.from(
+    new Set((clients || []).map((client) => client.client_user_id).filter(Boolean))
+  );
+
+  const { data: profiles, error: profilesError } =
+    clientUserIds.length > 0
+      ? await supabase
+          .from("profiles")
+          .select("user_id, display_name, avatar_url")
+          .in("user_id", clientUserIds)
+      : { data: [], error: null };
+
+  if (profilesError) {
+    throw profilesError;
+  }
+
+  return (meetings || []).map((meeting) => {
+    const client = clients?.find(
+      (item) => item.id === meeting.organization_client_id
+    );
+
+    const profile = profiles?.find(
+      (item) => item.user_id === client?.client_user_id
+    );
+
+    return {
+      ...meeting,
+      client,
+      client_profile: profile || null,
+    };
+  });
 }
