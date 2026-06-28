@@ -1,30 +1,29 @@
-import Link from "next/link";
 import ClientCard from "@/components/coach/ClientCard";
+import DashboardCard from "@/components/coach/DashboardCard";
 
 type ActiveClientsProps = {
   clients: any[];
 };
 
-export default function ActiveClients({
-  clients,
-}: ActiveClientsProps) {
+export default function ActiveClients({ clients }: ActiveClientsProps) {
   return (
-    <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
-      <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-        ACTIVE CLIENTS
-      </p>
-
+    <DashboardCard
+      eyebrow="ACTIVE CLIENTS"
+      title={`${clients.length} Active Client${clients.length === 1 ? "" : "s"}`}
+      className="mt-8"
+    >
       {clients.length === 0 ? (
-        <p className="mt-4 text-slate-400">
-          No active clients yet.
+        <p className="mt-6 text-slate-400">
+          No active clients yet. Invite your first client to start building their
+          career intelligence workspace.
         </p>
       ) : (
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {clients.map((client) => (
-          <ClientCard key={client.id} client={client} />
-        ))}
+        <div className="mt-6 space-y-4">
+          {clients.map((client) => (
+            <ClientCard key={client.id} client={client} />
+          ))}
         </div>
       )}
-    </div>
+    </DashboardCard>
   );
 }
