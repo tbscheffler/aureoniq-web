@@ -450,3 +450,46 @@ export async function getCoachRecentActivity(organizationId: string) {
       null,
   }));
 }
+
+export async function getOrganizationNotifications(organizationId: string) {
+  const { data, error } = await supabase
+    .from("organization_notifications")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false })
+    .limit(25);
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getUnreadOrganizationNotificationCount(
+  organizationId: string
+) {
+  const { count, error } = await supabase
+    .from("organization_notifications")
+    .select("*", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .is("read_at", null);
+
+  if (error) {
+    throw error;
+  }
+
+  return count ?? 0;
+}
+
+export async function markOrganizationNotificationRead(notificationId: string) {
+  const { error } = await supabase
+    .from("organization_notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("id", notificationId)
+    .is("read_at", null);
+
+  if (error) {
+    throw error;
+  }
+}
