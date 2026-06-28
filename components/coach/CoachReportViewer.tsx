@@ -1,4 +1,7 @@
 import DashboardCard from "@/components/coach/DashboardCard";
+import ExecutiveSummary from "@/components/coach/reports/ExecutiveSummary";
+import CareerOpportunities from "@/components/coach/reports/CareerOpportunities";
+import TransferableSkills from "@/components/coach/reports/TransferableSkills";
 
 type CoachReportViewerProps = {
   title: string;
@@ -24,15 +27,13 @@ export default function CoachReportViewer({
         </p>
       ) : (
         <>
-          <div className="mt-6 rounded-2xl border border-slate-700 bg-[#020617] p-6">
-            <p className="text-sm font-black tracking-[0.2em] text-slate-500">
-              EXECUTIVE SUMMARY
-            </p>
-
-            <p className="mt-4 leading-7 text-slate-300">
-              {summary || "Summary coming next."}
-            </p>
-          </div>
+            <ExecutiveSummary report={latestReport.report_json || latestReport} />
+            <CareerOpportunities
+                report={latestReport.report_json || latestReport}
+                />
+            <TransferableSkills
+                report={latestReport.report_json || latestReport}
+                />
 
           <div className="mt-6 flex flex-wrap gap-3">
             <button className="rounded-2xl bg-[#FBBF24] px-5 py-3 font-black text-[#020617]">

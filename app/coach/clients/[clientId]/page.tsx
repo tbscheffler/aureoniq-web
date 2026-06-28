@@ -131,7 +131,11 @@ export default function CoachClientWorkspacePage() {
             ) : null}
 
             {activeSection === "aiq" ? (
-              <ReportSection title="AIQ Reports" reports={aiqReports} />
+              <CoachReportViewer
+                title="Future Potential"
+                summary="This report helps the coach review the client's future career potential, opportunity index, growth accelerators, alternative paths, and long-term positioning."
+                reports={aiqReports}
+              />
             ) : null}
 
             {activeSection === "timeline" ? (
