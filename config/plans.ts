@@ -57,6 +57,9 @@ export const PLANS: Record<PlanKey, PlanDefinition> = {
 
     audience: "coach",
 
+    stripePriceId:
+      process.env.STRIPE_COACH_PROFESSIONAL_PRICE_ID,
+
     monthlyPrice: 99,
 
     trialDays: 14,
@@ -70,6 +73,9 @@ export const PLANS: Record<PlanKey, PlanDefinition> = {
     key: "coach_growth",
 
     audience: "coach",
+
+    stripePriceId:
+      process.env.STRIPE_COACH_GROWTH_PRICE_ID,
 
     displayName: "Coach Growth",
 

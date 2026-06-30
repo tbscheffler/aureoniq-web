@@ -1,13 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { PLANS } from "@/config/plans";
+import { Suspense, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useSearchParams } from "next/navigation";
+import { PLANS, PlanKey } from "@/config/plans";
 
-const plan = PLANS.coach_starter;
 
 export default function StartTrialPage() {
+  return (
+    <Suspense fallback={<StartTrialFallback />}>
+      <StartTrialContent />
+    </Suspense>
+  );
+}
+
+function StartTrialContent() {
+  const searchParams = useSearchParams();
+  const selectedPlanKey = (searchParams.get("plan") || "coach_starter") as PlanKey;
+  const plan = PLANS[selectedPlanKey] || PLANS.coach_starter;
   const [startingCheckout, setStartingCheckout] = useState(false);
 
   async function startCheckout() {
@@ -27,7 +38,11 @@ const response = await fetch("/api/stripe/create-checkout-session", {
   method: "POST",
   headers: {
     Authorization: `Bearer ${session.access_token}`,
+    "Content-Type": "application/json",
   },
+  body: JSON.stringify({
+    planKey: plan.key,
+  }),
 });
 
       const data = await response.json();
@@ -109,6 +124,20 @@ const response = await fetch("/api/stripe/create-checkout-session", {
 
           <p className="mt-4 text-sm text-slate-500">
             Secure checkout powered by Stripe.
+          </p>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function StartTrialFallback() {
+  return (
+    <main className="min-h-screen bg-[#020617] text-white">
+      <section className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-16">
+        <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8 md:p-10">
+          <p className="font-black text-[#FBBF24]">
+            Loading trial options...
           </p>
         </div>
       </section>

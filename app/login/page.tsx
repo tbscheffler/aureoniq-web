@@ -37,11 +37,12 @@ export default function LoginPage() {
 
     const searchParams = new URLSearchParams(window.location.search);
     const signupSuccess = searchParams.get("signup") === "success";
+    const selectedPlan = searchParams.get("plan") || "coach_starter";
 
     if (roleData?.role === "founder") {
       window.location.href = "/founder";
     } else if (signupSuccess) {
-      window.location.href = "/start-trial";
+      window.location.href = `/start-trial?plan=${selectedPlan}`;
     } else {
       window.location.href = "/dashboard";
     }

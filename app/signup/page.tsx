@@ -1,10 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useSearchParams } from "next/navigation";
+import { PLANS, PlanKey } from "@/config/plans";
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={<SignupFallback />}>
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
+  const searchParams = useSearchParams();
+  const selectedPlanKey = (searchParams.get("plan") || "coach_starter") as PlanKey;
+  const selectedPlan = PLANS[selectedPlanKey] || PLANS.coach_starter;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -35,7 +48,7 @@ export default function SignupPage() {
         return;
       }
 
-      window.location.href = "/login?signup=success";
+      window.location.href = `/login?signup=success&plan=${selectedPlan.key}`;
     } catch (err: any) {
       alert(err.message || "Signup failed");
     } finally {
@@ -59,8 +72,9 @@ export default function SignupPage() {
         </h1>
 
         <p className="mt-4 leading-7 text-slate-400">
-          Start free for 14 days with up to 4 active clients. Starter is
-          $49/month after trial.
+          Start free for {selectedPlan.trialDays} days with up to{" "}
+          {selectedPlan.activeClientLimit} active clients. {selectedPlan.displayName} is $
+          {selectedPlan.monthlyPrice}/month after trial.
         </p>
 
         <div className="mt-10 space-y-4">
@@ -101,6 +115,16 @@ export default function SignupPage() {
             </Link>
           </p>
         </div>
+      </section>
+    </main>
+  );
+}
+
+function SignupFallback() {
+  return (
+    <main className="min-h-screen bg-[#020617] text-white">
+      <section className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
+        <p className="font-black text-[#FBBF24]">Loading signup...</p>
       </section>
     </main>
   );

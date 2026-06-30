@@ -1,14 +1,30 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@supabase/supabase-js";
+import { PLANS } from "@/config/plans";
 
 export async function POST(request: Request) {
   try {
-    const priceId = process.env.STRIPE_COACH_STARTER_PRICE_ID;
+    const { planKey = "coach_starter" } = await request.json().catch(() => ({
+      planKey: "coach_starter",
+    }));
+
+    if (
+      !["coach_starter", "coach_professional", "coach_growth"].includes(planKey)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid coach plan selected." },
+        { status: 400 }
+      );
+    }
+
+    const plan = PLANS[planKey as keyof typeof PLANS];
+
+    const priceId = plan.stripePriceId;
 
     if (!priceId) {
       return NextResponse.json(
-        { error: "Missing STRIPE_COACH_STARTER_PRICE_ID." },
+        { error: `Missing Stripe Price ID for ${plan.displayName}.` },
         { status: 500 }
       );
     }
@@ -63,13 +79,13 @@ export async function POST(request: Request) {
       client_reference_id: user.id,
       metadata: {
         supabase_user_id: user.id,
-        plan_key: "coach_starter",
+        plan_key: plan.key,
       },
       subscription_data: {
-        trial_period_days: 14,
+        trial_period_days: plan.trialDays,
         metadata: {
           supabase_user_id: user.id,
-          plan_key: "coach_starter",
+          plan_key: plan.key,
         },
       },
       line_items: [
