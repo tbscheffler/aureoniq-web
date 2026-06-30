@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { PLANS } from "@/config/plans";
 
 const trialDetails = [
   "14-day free trial",
@@ -36,6 +37,12 @@ const productSections = [
     text: "AIQ reports surface growth paths, market position, career trajectory, and hidden opportunities.",
     image: "/coach/aiq-report.png",
   },
+];
+
+const coachPlans = [
+  PLANS.coach_starter,
+  PLANS.coach_professional,
+  PLANS.coach_growth,
 ];
 
 export default function CoachesPage() {
@@ -160,40 +167,83 @@ export default function CoachesPage() {
         ))}
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-24">
-        <div className="rounded-3xl border border-[#FBBF24]/30 bg-[#FBBF24]/10 p-8 md:p-10">
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            14-DAY COACH TRIAL
-          </p>
+    <section className="mx-auto max-w-7xl px-6 pb-24">
+      <div className="mb-10 max-w-3xl">
+        <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+          COACH PRICING
+        </p>
 
-          <h2 className="mt-4 text-4xl font-black">Try AureonIQ free</h2>
+        <h2 className="mt-4 text-4xl font-black leading-tight">
+          Choose the plan that fits your practice.
+        </h2>
 
-          <p className="mt-4 max-w-2xl leading-8 text-slate-300">
-            Start with up to 4 active clients and experience the full coach
-            workspace before choosing a paid plan.
-          </p>
+        <p className="mt-5 text-lg leading-8 text-slate-400">
+          Start free for 14 days. Upgrade as your coaching practice grows.
+        </p>
+      </div>
 
-          <div className="mt-8 grid gap-3 md:grid-cols-2">
-            {trialDetails.map((detail) => (
-              <div
-                key={detail}
-                className="rounded-2xl border border-[#FBBF24]/20 bg-[#020617]/70 p-4"
-              >
-                <p className="font-black text-white">✓ {detail}</p>
-              </div>
-            ))}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {coachPlans.map((plan) => (
+          <div
+            key={plan.key}
+            className="rounded-3xl border border-slate-800 bg-[#111827] p-8"
+          >
+            <p className="text-sm font-black tracking-[0.2em] text-[#FBBF24]">
+              {plan.displayName.toUpperCase()}
+            </p>
+
+            <h3 className="mt-5 text-4xl font-black">
+              ${plan.monthlyPrice}
+              <span className="text-lg font-bold text-slate-500">/mo</span>
+            </h3>
+
+            <p className="mt-4 text-slate-400">
+              Up to {plan.activeClientLimit} active clients.
+            </p>
+
+            <div className="mt-6 space-y-3 text-sm text-slate-300">
+              <p>✓ {plan.trialDays}-day free trial</p>
+              <p>✓ AI-prepared resume reviews</p>
+              <p>✓ Career Assessment and AIQ viewers</p>
+              <p>✓ Coach notes, meetings, and action items</p>
+            </div>
+
+            <Link
+              href={`/signup?plan=${plan.key}`}
+              className="mt-8 inline-block w-full rounded-2xl bg-[#FBBF24] px-6 py-4 text-center font-black text-[#020617] transition hover:scale-[1.02]"
+            >
+              Start {plan.displayName}
+            </Link>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-6 rounded-3xl border border-slate-800 bg-[#111827] p-8">
+        <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+          <div>
+            <p className="text-sm font-black tracking-[0.2em] text-[#FBBF24]">
+              ENTERPRISE
+            </p>
+
+            <h3 className="mt-3 text-3xl font-black">
+              Need more than 25 active clients?
+            </h3>
+
+            <p className="mt-3 max-w-3xl leading-7 text-slate-400">
+              AureonIQ can support coaching organizations, universities, workforce
+              programs, and custom deployments.
+            </p>
           </div>
 
-        <div className="mt-8">
           <Link
-            href="/signup?plan=coach_starter"
-            className="inline-block rounded-2xl bg-[#FBBF24] px-7 py-4 font-black text-[#020617] transition hover:scale-[1.02]"
+            href="/contact"
+            className="inline-block rounded-2xl border border-[#FBBF24] px-6 py-4 text-center font-black text-[#FBBF24] transition hover:bg-[#FBBF24] hover:text-[#020617]"
           >
-            Start Your 14-Day Trial
+            Request a Demo
           </Link>
         </div>
-        </div>
-      </section>
+      </div>
+    </section>
     </main>
   );
 }
