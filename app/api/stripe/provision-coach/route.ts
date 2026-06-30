@@ -38,7 +38,14 @@ export async function POST(request: Request) {
 
     const subscription: any = checkoutSession.subscription;
     const customer: any = checkoutSession.customer;
-    const plan = PLANS.coach_starter;
+    const planKey =
+    (checkoutSession.metadata?.plan_key as keyof typeof PLANS) || "coach_starter";
+
+    const plan = PLANS[planKey];
+
+    if (!plan || plan.audience !== "coach") {
+      throw new Error(`Invalid coach plan key: ${planKey}`);
+    }
 
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 

@@ -74,7 +74,14 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   const supabaseAdmin = getSupabaseAdmin();
-  const plan = PLANS.coach_starter;
+  const planKey =
+  (session.metadata?.plan_key as keyof typeof PLANS) || "coach_starter";
+
+  const plan = PLANS[planKey];
+
+  if (!plan || plan.audience !== "coach") {
+    throw new Error(`Invalid coach plan key: ${planKey}`);
+  }
 
   const subscriptionId =
     typeof session.subscription === "string"
