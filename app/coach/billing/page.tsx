@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   getCurrentOrganization,
   getOrganizationPlan,
   getOrganizationClients,
 } from "@/services/coachService";
 import CoachShell from "@/components/coach/CoachShell";
+import { supabase } from "@/lib/supabaseClient";
 
 const PLAN_OPTIONS = [
   {
@@ -45,6 +45,40 @@ export default function CoachBillingPage() {
   const [organization, setOrganization] = useState<any>(null);
   const [plan, setPlan] = useState<any>(null);
   const [clients, setClients] = useState<any[]>([]);
+  const [openingPortal, setOpeningPortal] = useState(false);
+
+  async function openCustomerPortal() {
+    try {
+      setOpeningPortal(true);
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      const response = await fetch("/api/stripe/create-portal-session", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to open billing portal.");
+      }
+
+      window.location.href = data.url;
+    } catch (error: any) {
+      alert(error.message || "Unable to open billing portal.");
+      setOpeningPortal(false);
+    }
+  }
 
   useEffect(() => {
     async function loadBilling() {
@@ -113,21 +147,34 @@ export default function CoachBillingPage() {
           <SummaryCard title="Seats Remaining" value={seatsRemaining} />
         </div>
 
-        <div className="mt-10 rounded-3xl border border-slate-800 bg-[#111827] p-8">
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            SUBSCRIPTION STATUS
-          </p>
+<div className="mt-10 rounded-3xl border border-slate-800 bg-[#111827] p-8">
+  <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+    SUBSCRIPTION
+  </p>
 
-          <h2 className="mt-4 text-3xl font-black">
-            Billing integration coming next
-          </h2>
+  <h2 className="mt-4 text-3xl font-black">
+    {formatPlanName(currentPlanType)}
+  </h2>
 
-          <p className="mt-4 max-w-3xl leading-7 text-slate-400">
-            This page is ready for Stripe checkout, customer portal access,
-            invoices, and plan changes. For now, plan data is powered by your
-            organization_plans table.
-          </p>
-        </div>
+  <p className="mt-4 max-w-3xl leading-7 text-slate-400">
+    Manage payment methods, invoices, cancellations, and subscription settings
+    securely through Stripe.
+  </p>
+
+  <div className="mt-6 grid gap-4 md:grid-cols-3">
+      <SummaryCard title="Status" value={plan?.status || "active"} />
+      <SummaryCard title="Client Limit" value={clientLimit} />
+      <SummaryCard title="Active Clients" value={activeClients} />
+    </div>
+
+    <button
+      onClick={openCustomerPortal}
+      disabled={openingPortal}
+      className="mt-8 rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617] disabled:opacity-60"
+    >
+      {openingPortal ? "Opening Billing..." : "Manage Billing"}
+    </button>
+  </div>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {PLAN_OPTIONS.map((option) => (

@@ -23,6 +23,7 @@ import SeatUsageCard from "@/components/coach/SeatUsageCard";
 import CoachShell from "@/components/coach/CoachShell";
 import CoachDashboardHeader from "@/components/coach/CoachDashboardHeader";
 import TodaysAgenda from "@/components/coach/TodaysAgenda";
+import { getCoachEntitlement } from "@/services/billing/entitlementService";
 
 export default function CoachPage() {
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,13 @@ export default function CoachPage() {
         }
 
         window.history.replaceState({}, "", "/coach");
+      }
+
+      const entitlement = await getCoachEntitlement();
+
+      if (!entitlement.hasAccess) {
+        window.location.href = `/billing-required?reason=${entitlement.reason}`;
+        return;
       }
 
       const membership = await getCurrentOrganization();
