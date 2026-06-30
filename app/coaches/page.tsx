@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 const trialDetails = [
   "14-day free trial",
@@ -36,6 +39,28 @@ const productSections = [
 ];
 
 export default function CoachesPage() {
+  const [startingCheckout, setStartingCheckout] = useState(false);
+
+  async function startCheckout() {
+    try {
+      setStartingCheckout(true);
+
+      const response = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to start checkout.");
+      }
+
+      window.location.href = data.url;
+    } catch (error: any) {
+      alert(error.message || "Unable to start checkout.");
+      setStartingCheckout(false);
+    }
+  }
   return (
     <main className="min-h-screen bg-[#020617] text-white">
       <section className="mx-auto max-w-7xl px-6 py-24">
@@ -54,12 +79,12 @@ export default function CoachesPage() {
         </p>
 
         <div className="mt-10 flex flex-wrap gap-4">
-          <Link
-            href="/coach"
-            className="rounded-2xl bg-[#FBBF24] px-7 py-4 font-black text-[#020617] shadow-lg shadow-[#FBBF24]/10 transition hover:scale-[1.02]"
-          >
-            Start Your 14-Day Trial
-          </Link>
+        <Link
+          href="/signup?plan=coach_starter"
+          className="rounded-2xl bg-[#FBBF24] px-7 py-4 font-black text-[#020617] shadow-lg shadow-[#FBBF24]/10 transition hover:scale-[1.02]"
+        >
+          Start Your 14-Day Trial
+        </Link>
 
           <Link
             href="/contact"
@@ -159,12 +184,14 @@ export default function CoachesPage() {
             ))}
           </div>
 
+        <div className="mt-8">
           <Link
-            href="/coach"
-            className="mt-8 inline-block rounded-2xl bg-[#FBBF24] px-7 py-4 font-black text-[#020617] transition hover:scale-[1.02]"
+            href="/signup?plan=coach_starter"
+            className="inline-block rounded-2xl bg-[#FBBF24] px-7 py-4 font-black text-[#020617] transition hover:scale-[1.02]"
           >
             Start Your 14-Day Trial
           </Link>
+        </div>
         </div>
       </section>
     </main>
