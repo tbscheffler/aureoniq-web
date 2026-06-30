@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   getCurrentOrganization,
   getOrganizationPlan,
@@ -11,32 +12,33 @@ import { supabase } from "@/lib/supabaseClient";
 
 const PLAN_OPTIONS = [
   {
-    name: "Free Beta",
-    price: "$0",
+    name: "Coach Starter",
+    price: "$49/mo",
     limit: 4,
-    planType: "coach_beta",
-    description: "For early coach testing and product feedback.",
+    planType: "coach_starter",
+    description: "For solo coaches starting with a focused client roster.",
   },
   {
-    name: "Professional",
-    price: "$49/mo",
+    name: "Coach Professional",
+    price: "$99/mo",
     limit: 10,
     planType: "coach_professional",
-    description: "For solo coaches managing a focused client roster.",
+    description: "For established coaches managing more active clients.",
   },
   {
-    name: "Growth",
-    price: "$99/mo",
+    name: "Coach Growth",
+    price: "$199/mo",
     limit: 25,
     planType: "coach_growth",
-    description: "For growing practices with more active clients.",
+    description: "For growing practices and small coaching teams.",
   },
   {
-    name: "Business",
-    price: "$199/mo",
-    limit: 50,
-    planType: "coach_business",
-    description: "For teams and larger coaching organizations.",
+    name: "Enterprise",
+    price: "Contact Sales",
+    limit: "Custom",
+    planType: "coach_enterprise",
+    description:
+      "For coaching organizations, universities, workforce programs, and custom deployments.",
   },
 ];
 
@@ -226,15 +228,26 @@ function PlanOptionCard({
       <p className="mt-6 text-4xl font-black text-[#FBBF24]">{option.price}</p>
 
       <p className="mt-3 text-sm font-bold text-slate-300">
-        Up to {option.limit} active clients
+        {option.limit === "Custom"
+        ? "Custom active client limits"
+        : `Up to ${option.limit} active clients`}
       </p>
 
-      <button
-        disabled
-        className="mt-8 rounded-2xl bg-[#FBBF24]/20 px-5 py-3 font-black text-[#FBBF24]"
-      >
-        Stripe Coming Soon
-      </button>
+      {option.planType === "coach_enterprise" ? (
+        <Link
+          href="/contact"
+          className="mt-8 inline-block rounded-2xl bg-[#FBBF24] px-5 py-3 font-black text-[#020617] transition hover:scale-[1.02]"
+        >
+          Request a Demo
+        </Link>
+      ) : (
+        <button
+          disabled
+          className="mt-8 rounded-2xl bg-[#FBBF24]/20 px-5 py-3 font-black text-[#FBBF24]"
+        >
+          Self-Service
+        </button>
+      )}
     </div>
   );
 }
