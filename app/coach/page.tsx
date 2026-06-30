@@ -39,6 +39,30 @@ export default function CoachPage() {
 
   async function loadCoachDashboard() {
     try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const checkoutSuccess = searchParams.get("checkout") === "success";
+      const sessionId = searchParams.get("session_id");
+
+      if (checkoutSuccess && sessionId) {
+        const provisionResponse = await fetch("/api/stripe/provision-coach", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ sessionId }),
+        });
+
+        const provisionData = await provisionResponse.json();
+
+        if (!provisionResponse.ok) {
+          throw new Error(
+            provisionData.error || "Unable to activate coach workspace."
+          );
+        }
+
+        window.history.replaceState({}, "", "/coach");
+      }
+
       const membership = await getCurrentOrganization();
 
       const organizationId = membership.organization_id;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { PLANS } from "@/config/plans";
+import { supabase } from "@/lib/supabaseClient";
 
 const plan = PLANS.coach_starter;
 
@@ -13,9 +14,21 @@ export default function StartTrialPage() {
     try {
       setStartingCheckout(true);
 
-      const response = await fetch("/api/stripe/create-checkout-session", {
-        method: "POST",
-      });
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+if (!session?.access_token) {
+  window.location.href = "/login";
+  return;
+}
+
+const response = await fetch("/api/stripe/create-checkout-session", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${session.access_token}`,
+  },
+});
 
       const data = await response.json();
 
