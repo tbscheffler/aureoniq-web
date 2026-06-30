@@ -1,23 +1,37 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 const reasonMessages: Record<string, string> = {
-  no_plan:
-    "Your coach workspace does not have an active plan yet.",
+  no_plan: "Your coach workspace does not have an active plan yet.",
   expired_trial:
     "Your coach trial has ended. Activate billing to continue using your workspace.",
-  active_subscription:
-    "Your subscription is active.",
-  active_trial:
-    "Your trial is active.",
+  active_subscription: "Your subscription is active.",
+  active_trial: "Your trial is active.",
 };
 
 export default function BillingRequiredPage() {
+  return (
+    <Suspense fallback={<BillingRequiredContentFallback />}>
+      <BillingRequiredContent />
+    </Suspense>
+  );
+}
+
+function BillingRequiredContent() {
   const searchParams = useSearchParams();
   const reason = searchParams.get("reason") || "no_plan";
 
+  return <BillingRequiredLayout message={reasonMessages[reason] || reasonMessages.no_plan} />;
+}
+
+function BillingRequiredContentFallback() {
+  return <BillingRequiredLayout message={reasonMessages.no_plan} />;
+}
+
+function BillingRequiredLayout({ message }: { message: string }) {
   return (
     <main className="min-h-screen bg-[#020617] text-white">
       <section className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6">
@@ -34,9 +48,7 @@ export default function BillingRequiredPage() {
             Activate your coach workspace.
           </h1>
 
-          <p className="mt-5 text-lg leading-8 text-slate-300">
-            {reasonMessages[reason] || reasonMessages.no_plan}
-          </p>
+          <p className="mt-5 text-lg leading-8 text-slate-300">{message}</p>
 
           <div className="mt-8 rounded-2xl border border-slate-700 bg-[#020617] p-6">
             <p className="font-black text-white">Coach Starter includes:</p>
