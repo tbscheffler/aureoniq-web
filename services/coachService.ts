@@ -783,3 +783,33 @@ export async function saveResumeReviewFindingNote({
 
   return data;
 }
+
+
+export async function ensureSampleClientForOrganization(
+  organizationId: string
+) {
+  const { data, error } = await supabase.rpc(
+    "ensure_sample_client_for_organization",
+    {
+      p_organization_id: organizationId,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getCoachDashboard(organizationId: string) {
+  const { data, error } = await supabase.rpc("get_coach_dashboard", {
+    p_organization_id: organizationId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

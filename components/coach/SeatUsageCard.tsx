@@ -1,14 +1,16 @@
 type SeatUsageCardProps = {
-    activeClients: number;
-    clientLimit: number;
-    planName: string;
-  };
+  activeClients: number;
+  clientLimit: number;
+  planName: string;
+  demoClients?: number;
+};
   
-  export default function SeatUsageCard({
-    activeClients,
-    clientLimit,
-    planName,
-  }: SeatUsageCardProps) {
+export default function SeatUsageCard({
+  activeClients,
+  clientLimit,
+  planName,
+  demoClients = 0,
+}: SeatUsageCardProps) {
     const safeLimit = clientLimit > 0 ? clientLimit : 4;
     const usagePercent = Math.min((activeClients / safeLimit) * 100, 100);
   
@@ -21,7 +23,7 @@ type SeatUsageCardProps = {
             </p>
   
             <h2 className="mt-4 text-3xl font-black text-white">
-              {activeClients} of {safeLimit} active client seats used
+              {activeClients} of {safeLimit} billable client seats used
             </h2>
   
             <p className="mt-3 text-slate-400">
@@ -47,9 +49,12 @@ type SeatUsageCardProps = {
             Seat limit reached. Upgrade will be required before adding another active client.
           </p>
         ) : (
-          <p className="mt-4 text-sm text-slate-400">
-            {safeLimit - activeClients} active client seats remaining.
-          </p>
+        <p className="mt-4 text-sm text-slate-400">
+          {safeLimit - activeClients} billable client seats remaining.
+          {demoClients > 0
+            ? ` ${demoClients} demo client${demoClients === 1 ? "" : "s"} included at no cost.`
+            : ""}
+        </p>
         )}
       </div>
     );

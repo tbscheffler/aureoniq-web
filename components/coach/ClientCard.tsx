@@ -5,11 +5,12 @@ type ClientCardProps = {
 };
 
 export default function ClientCard({ client }: ClientCardProps) {
-  const displayName =
-    client.profile?.display_name ||
-    client.client_profile?.display_name ||
-    client.client_email ||
-    "Client";
+const displayName =
+  client.client_display_name ||
+  client.profile?.display_name ||
+  client.client_profile?.display_name ||
+  client.client_email ||
+  "Client";
 
   return (
     <div className="rounded-3xl border border-slate-800 bg-[#020617] p-5 transition hover:border-[#FBBF24]/60">

@@ -12,6 +12,8 @@ import {
   revokeOrganizationInvitation,
   getCoachAgendaStats,
   getTodaysCoachMeetings,
+  ensureSampleClientForOrganization,
+  getCoachDashboard,
 } from "@/services/coachService";
 import QuickActions from "@/components/coach/QuickActions";
 import RecentActivity from "@/components/coach/RecentActivity";
@@ -37,6 +39,7 @@ export default function CoachPage() {
   const [activity, setActivity] = useState<any[]>([]);
   const [agendaStats, setAgendaStats] = useState<any>(null);
   const [todaysMeetings, setTodaysMeetings] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<any>(null);
 
   async function loadCoachDashboard() {
     try {
@@ -74,35 +77,35 @@ export default function CoachPage() {
       const membership = await getCurrentOrganization();
 
       const organizationId = membership.organization_id;
+      await ensureSampleClientForOrganization(organizationId);
       const orgData = Array.isArray(membership.organizations)
         ? membership.organizations[0]
         : membership.organizations;
 
-        const [
-          planData,
-          clientData,
-          inviteData,
-          statsData,
-          activityData,
-          agendaData,
-          todaysMeetingsData,
-        ] = await Promise.all([
-          getOrganizationPlan(organizationId),
-          getOrganizationClients(organizationId),
-          getPendingInvitations(organizationId),
-          getCoachDashboardStats(organizationId),
-          getCoachRecentActivity(organizationId),
-          getCoachAgendaStats(organizationId),
-          getTodaysCoachMeetings(organizationId),
-        ]);
+      const [
+        planData,
+        clientData,
+        inviteData,
+        dashboardData,
+        activityData,
+        todaysMeetingsData,
+      ] = await Promise.all([
+        getOrganizationPlan(organizationId),
+        getOrganizationClients(organizationId),
+        getPendingInvitations(organizationId),
+        getCoachDashboard(organizationId),
+        getCoachRecentActivity(organizationId),
+        getTodaysCoachMeetings(organizationId),
+      ]);
 
       setOrganization(orgData);
       setPlan(planData);
       setClients(clientData || []);
       setInvitations(inviteData || []);
-      setStats(statsData);
+      setDashboardData(dashboardData);
+      setStats(dashboardData?.stats || null);
       setActivity(activityData || []);
-      setAgendaStats(agendaData);
+      setAgendaStats(dashboardData?.agenda || null);
       setTodaysMeetings(todaysMeetingsData || []);
       setLoading(false);
     } catch (error: any) {
@@ -177,8 +180,11 @@ export default function CoachPage() {
     );
   }
 
-  const clientLimit = Number(plan?.managed_client_limit ?? 4);
-  const activeClients = clients.length;
+  const seatUsage = dashboardData?.seatUsage;
+
+  const clientLimit = Number(seatUsage?.seat_limit ?? plan?.managed_client_limit ?? 4);
+  const activeClients = Number(seatUsage?.billable_clients ?? clients.length);
+  const demoClients = Number(seatUsage?.demo_clients ?? 0);
 
   return (
     <CoachShell>
@@ -208,9 +214,10 @@ export default function CoachPage() {
         />
 
         <SeatUsageCard
-          activeClients={stats?.activeClients ?? activeClients}
+          activeClients={activeClients}
           clientLimit={clientLimit}
           planName={plan?.plan_type || "free_beta"}
+          demoClients={demoClients}
         />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[380px_1fr]">
