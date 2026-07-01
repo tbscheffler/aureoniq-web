@@ -33,16 +33,21 @@ export default function FounderPage() {
         return;
       }
 
-      const { data: roleData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .maybeSingle();
+const { data: roles, error: roleError } = await supabase
+  .from("user_roles")
+  .select("role")
+  .eq("user_id", user.id);
 
-      if (roleData?.role !== "founder") {
-        window.location.href = "/dashboard";
-        return;
-      }
+if (roleError) {
+  throw roleError;
+}
+
+const isFounder = roles?.some((role) => role.role === "founder");
+
+if (!isFounder) {
+  window.location.href = "/dashboard";
+  return;
+}
 
       setAuthorized(true);
 

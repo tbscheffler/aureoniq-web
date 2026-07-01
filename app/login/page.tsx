@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { getUserWorkspaceAccess } from "@/services/workspaceAccessService";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -35,19 +36,28 @@ export default function LoginPage() {
       console.log("ROLE DATA:", roleData);
       console.log("ROLE ERROR:", roleError);
 
-    const searchParams = new URLSearchParams(window.location.search);
-    const signupSuccess = searchParams.get("signup") === "success";
-    const selectedPlan = searchParams.get("plan") || "coach_starter";
+const searchParams = new URLSearchParams(window.location.search);
+const signupSuccess = searchParams.get("signup") === "success";
+const selectedPlan = searchParams.get("plan") || "coach_starter";
 
-    if (roleData?.role === "founder") {
-      window.location.href = "/founder";
-    } else if (roleData?.role === "coach") {
-      window.location.href = "/coach";
-    } else if (signupSuccess) {
-      window.location.href = `/start-trial?plan=${selectedPlan}`;
-    } else {
-      window.location.href = "/dashboard";
-    }
+if (signupSuccess) {
+  window.location.href = `/start-trial?plan=${selectedPlan}`;
+  return;
+}
+
+const workspaces = await getUserWorkspaceAccess();
+
+if (workspaces.length === 1) {
+  window.location.href = workspaces[0].href;
+  return;
+}
+
+if (workspaces.length > 1) {
+  window.location.href = "/portal";
+  return;
+}
+
+window.location.href = "/dashboard";
     } catch (err: any) {
       alert(err.message || "Login failed");
     } finally {
