@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useSearchParams } from "next/navigation";
 import { PLANS, PlanKey } from "@/config/plans";
+import { getCoachEntitlement } from "@/services/billing/entitlementService";
 
 
 export default function StartTrialPage() {
@@ -20,6 +21,24 @@ function StartTrialContent() {
   const selectedPlanKey = (searchParams.get("plan") || "coach_starter") as PlanKey;
   const plan = PLANS[selectedPlanKey] || PLANS.coach_starter;
   const [startingCheckout, setStartingCheckout] = useState(false);
+
+  useEffect(() => {
+  async function redirectExistingCoach() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) return;
+
+    const entitlement = await getCoachEntitlement();
+
+    if (entitlement.hasAccess) {
+      window.location.href = "/coach";
+    }
+  }
+
+  redirectExistingCoach();
+}, []);
 
   async function startCheckout() {
     try {

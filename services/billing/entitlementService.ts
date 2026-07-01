@@ -13,11 +13,23 @@ export interface CoachEntitlement {
 }
 
 export async function getCoachEntitlement(): Promise<CoachEntitlement> {
-  const { data: membership, error: membershipError } = await supabase
-    .from("organization_members")
-    .select("organization_id")
-    .eq("status", "active")
-    .maybeSingle();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+  return {
+    hasAccess: false,
+    reason: "no_plan",
+  };
+}
+
+const { data: membership, error: membershipError } = await supabase
+  .from("organization_members")
+  .select("organization_id")
+  .eq("user_id", user.id)
+  .eq("status", "active")
+  .maybeSingle();
 
   if (membershipError || !membership) {
     return {

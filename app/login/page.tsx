@@ -41,6 +41,8 @@ export default function LoginPage() {
 
     if (roleData?.role === "founder") {
       window.location.href = "/founder";
+    } else if (roleData?.role === "coach") {
+      window.location.href = "/coach";
     } else if (signupSuccess) {
       window.location.href = `/start-trial?plan=${selectedPlan}`;
     } else {
