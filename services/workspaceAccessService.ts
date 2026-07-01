@@ -58,3 +58,11 @@ export async function getUserWorkspaceAccess(): Promise<WorkspaceAccess[]> {
 
   return workspaces;
 }
+
+export async function hasWorkspaceAccess(
+  workspaceKey: WorkspaceAccess["key"]
+): Promise<boolean> {
+  const workspaces = await getUserWorkspaceAccess();
+
+  return workspaces.some((workspace) => workspace.key === workspaceKey);
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { hasWorkspaceAccess } from "@/services/workspaceAccessService";
 
 export default function FounderPage() {
   const [loading, setLoading] = useState(true);
@@ -33,16 +34,7 @@ export default function FounderPage() {
         return;
       }
 
-const { data: roles, error: roleError } = await supabase
-  .from("user_roles")
-  .select("role")
-  .eq("user_id", user.id);
-
-if (roleError) {
-  throw roleError;
-}
-
-const isFounder = roles?.some((role) => role.role === "founder");
+const isFounder = await hasWorkspaceAccess("founder");
 
 if (!isFounder) {
   window.location.href = "/dashboard";
