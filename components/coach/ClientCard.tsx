@@ -12,6 +12,8 @@ const displayName =
   client.client_email ||
   "Client";
 
+  const isSampleClient = Boolean(client.is_sample);
+
   return (
     <div className="rounded-3xl border border-slate-800 bg-[#020617] p-5 transition hover:border-[#FBBF24]/60">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -19,11 +21,16 @@ const displayName =
           <p className="text-lg font-black text-white">{displayName}</p>
 
           <p className="mt-2 text-sm text-slate-400">
-            Client relationship managed through AureonIQ.
+            {isSampleClient
+            ? "Explore a completed demo workspace before inviting your first real client."
+            : "Client relationship managed through AureonIQ."}
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <StatusPill label="Active" tone="green" />
+            <StatusPill
+              label={isSampleClient ? "Demo Workspace" : "Active"}
+              tone={isSampleClient ? "gold" : "green"}
+            />
             <StatusPill label="Resume Pending" tone="slate" />
             <StatusPill label="Assessment Pending" tone="gold" />
             <StatusPill label="AIQ Pending" tone="slate" />

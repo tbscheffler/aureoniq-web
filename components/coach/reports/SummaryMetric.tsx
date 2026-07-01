@@ -13,7 +13,13 @@ type Props = {
           {label}
         </p>
   
-        <p className="mt-3 text-3xl font-black text-[#FBBF24]">
+        <p
+          className={`mt-3 font-black leading-tight text-[#FBBF24] ${
+            String(value).length > 12
+              ? "text-xl"
+              : "text-3xl"
+          }`}
+        >
           {value}
         </p>
       </div>

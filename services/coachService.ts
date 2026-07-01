@@ -802,6 +802,23 @@ export async function ensureSampleClientForOrganization(
   return data;
 }
 
+export async function getClientHealth(
+  organizationClientId: string
+) {
+  const { data, error } = await supabase.rpc(
+    "calculate_client_health",
+    {
+      p_organization_client_id: organizationClientId,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.[0] ?? null;
+}
+
 export async function getCoachDashboard(organizationId: string) {
   const { data, error } = await supabase.rpc("get_coach_dashboard", {
     p_organization_id: organizationId,

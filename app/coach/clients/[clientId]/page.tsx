@@ -6,6 +6,7 @@ import {
   getCoachClientSummary,
   getOpenOrganizationClientActionItemCount,
   getNextOrganizationClientMeeting,
+  getClientHealth,
 } from "@/services/coachService";
 import {
   MetricCard,
@@ -34,6 +35,7 @@ export default function CoachClientWorkspacePage() {
     const [activeSection, setActiveSection] = useState("overview");
     const [openActionItems, setOpenActionItems] = useState(0);
     const [nextMeeting, setNextMeeting] = useState<any>(null);
+    const [clientHealth, setClientHealth] = useState<any>(null);
 
   useEffect(() => {
     async function loadWorkspace() {
@@ -41,10 +43,15 @@ export default function CoachClientWorkspacePage() {
         const data = await getCoachClientSummary(clientId);
         setWorkspace(data);
 
-        const actionCount = await getOpenOrganizationClientActionItemCount(clientId);
+        const [actionCount, nextMeetingData, healthData] = await Promise.all([
+          getOpenOrganizationClientActionItemCount(clientId),
+          getNextOrganizationClientMeeting(clientId),
+          getClientHealth(clientId),
+        ]);
+
         setOpenActionItems(actionCount);
-        const nextMeetingData = await getNextOrganizationClientMeeting(clientId);
         setNextMeeting(nextMeetingData);
+        setClientHealth(healthData);
       } catch (err: any) {
         setError(err.message || "Unable to load client workspace.");
       } finally {
@@ -80,7 +87,14 @@ export default function CoachClientWorkspacePage() {
   return (
     <CoachShell>
     <section>
-    <ClientWorkspaceHeader client={workspace?.client} />
+    <ClientWorkspaceHeader
+      client={workspace?.client}
+      hasDiscoveryReport={careerReports.length > 0}
+      hasAIQReport={aiqReports.length > 0}
+      openActionItems={openActionItems}
+      nextMeeting={nextMeeting}
+      clientHealth={clientHealth}
+    />
 
         {/* <div className="mt-10 grid gap-6 md:grid-cols-3">
           <MetricCard title="Discovery Reports" value={careerReports.length} />
@@ -119,12 +133,22 @@ export default function CoachClientWorkspacePage() {
                       }
                     : null
                 }
-                intelligence={getCareerIntelligenceSummary({
-                  hasDiscoveryReport: careerReports.length > 0,
-                  hasAIQReport: aiqReports.length > 0,
-                  openActionItems,
-                  hasNextMeeting: Boolean(nextMeeting),
-                })}
+              intelligence={{
+                careerHealth: clientHealth?.score ?? 0,
+                riskLevel:
+                  clientHealth?.status === "Excellent" || clientHealth?.status === "Strong"
+                    ? "Low"
+                    : clientHealth?.status === "Needs Attention"
+                    ? "Medium"
+                    : "High",
+                careerMomentum: clientHealth?.status || "Not Scored",
+                nextRecommendedAction:
+                  clientHealth?.status === "Excellent" || clientHealth?.status === "Strong"
+                    ? "This client is progressing well. Continue reinforcing the current coaching plan."
+                    : clientHealth?.status === "Needs Attention"
+                    ? "This client has several active career intelligence signals, but still needs follow-up."
+                    : "Start by completing the client's resume, assessment, or next coaching action.",
+              }}
               />
             ) : null}
 

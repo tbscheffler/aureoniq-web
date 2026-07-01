@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   getCurrentOrganization,
   getOrganizationPlan,
-  getOrganizationClients,
+  getCoachDashboard,
 } from "@/services/coachService";
 import CoachShell from "@/components/coach/CoachShell";
 import { supabase } from "@/lib/supabaseClient";
@@ -46,7 +46,7 @@ export default function CoachBillingPage() {
   const [loading, setLoading] = useState(true);
   const [organization, setOrganization] = useState<any>(null);
   const [plan, setPlan] = useState<any>(null);
-  const [clients, setClients] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const [openingPortal, setOpeningPortal] = useState(false);
 
   async function openCustomerPortal() {
@@ -92,14 +92,14 @@ export default function CoachBillingPage() {
           ? membership.organizations[0]
           : membership.organizations;
 
-        const [planData, clientData] = await Promise.all([
+        const [planData, dashboardData] = await Promise.all([
           getOrganizationPlan(organizationId),
-          getOrganizationClients(organizationId),
+          getCoachDashboard(organizationId),
         ]);
 
         setOrganization(orgData);
         setPlan(planData);
-        setClients(clientData || []);
+        setDashboardData(dashboardData);
       } catch (error: any) {
         alert(error.message || "Unable to load billing.");
         window.location.href = "/coach";
@@ -122,9 +122,12 @@ export default function CoachBillingPage() {
   }
 
   const currentPlanType = plan?.plan_type || "coach_beta";
-  const clientLimit = Number(plan?.managed_client_limit ?? 4);
-  const activeClients = clients.length;
-  const seatsRemaining = Math.max(clientLimit - activeClients, 0);
+  const seatUsage = dashboardData?.seatUsage;
+
+  const clientLimit = Number(seatUsage?.seat_limit ?? plan?.managed_client_limit ?? 4);
+  const activeClients = Number(seatUsage?.billable_clients ?? 0);
+  const demoClients = Number(seatUsage?.demo_clients ?? 0);
+  const seatsRemaining = Number(seatUsage?.remaining_seats ?? Math.max(clientLimit - activeClients, 0));
 
   return (
       <CoachShell>
@@ -145,7 +148,7 @@ export default function CoachBillingPage() {
 
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           <SummaryCard title="Current Plan" value={formatPlanName(currentPlanType)} />
-          <SummaryCard title="Active Clients" value={`${activeClients} / ${clientLimit}`} />
+          <SummaryCard title="Billable Seats" value={`${activeClients} / ${clientLimit}`} />
           <SummaryCard title="Seats Remaining" value={seatsRemaining} />
         </div>
 
@@ -166,7 +169,8 @@ export default function CoachBillingPage() {
   <div className="mt-6 grid gap-4 md:grid-cols-3">
       <SummaryCard title="Status" value={plan?.status || "active"} />
       <SummaryCard title="Client Limit" value={clientLimit} />
-      <SummaryCard title="Active Clients" value={activeClients} />
+      <SummaryCard title="Billable Clients" value={activeClients} />
+      <SummaryCard title="Demo Clients" value={demoClients} />
     </div>
 
     <button
@@ -180,11 +184,12 @@ export default function CoachBillingPage() {
 
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {PLAN_OPTIONS.map((option) => (
-            <PlanOptionCard
-              key={option.planType}
-              option={option}
-              currentPlanType={currentPlanType}
-            />
+          <PlanOptionCard
+            key={option.planType}
+            option={option}
+            currentPlanType={currentPlanType}
+            openCustomerPortal={openCustomerPortal}
+          />
           ))}
         </div>
         </section>
@@ -204,9 +209,11 @@ function SummaryCard({ title, value }: { title: string; value: any }) {
 function PlanOptionCard({
   option,
   currentPlanType,
+  openCustomerPortal,
 }: {
   option: any;
   currentPlanType: string;
+  openCustomerPortal: () => void;
 }) {
   const isCurrent = option.planType === currentPlanType;
 
@@ -241,12 +248,12 @@ function PlanOptionCard({
           Request a Demo
         </Link>
       ) : (
-        <button
-          disabled
-          className="mt-8 rounded-2xl bg-[#FBBF24]/20 px-5 py-3 font-black text-[#FBBF24]"
-        >
-          Self-Service
-        </button>
+      <button
+        onClick={openCustomerPortal}
+        className="rounded-xl bg-[#FBBF24] px-5 py-3 font-black text-black transition hover:opacity-90"
+      >
+        Manage in Billing Portal
+      </button>
       )}
     </div>
   );
