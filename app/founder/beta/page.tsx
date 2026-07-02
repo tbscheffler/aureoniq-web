@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { createFounderInvitationCode } from "@/services/coachService";
+import { hasWorkspaceAccess } from "@/services/workspaceAccessService";
 
 
 function BetaMetricCard({
@@ -32,27 +33,45 @@ export default function FounderBetaPage() {
     const [coachName, setCoachName] = useState("");
     const [coachEmail, setCoachEmail] = useState("");
     const [creatingInvite, setCreatingInvite] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [authorized, setAuthorized] = useState(false);
 
     useEffect(() => {
-    async function loadInvites() {
-        const { data, error } = await supabase
-        .from("invitation_codes")
-        .select("*")
-        .order("created_at", { ascending: false });
+  async function loadBetaProgram() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-        console.log("Invitation data:", data);
-        console.log("Invitation error:", error);
-
-        if (error) {
-        alert(error.message);
-        return;
-        }
-
-        setInvites(data || []);
+    if (!user) {
+      window.location.href = "/login";
+      return;
     }
 
-    loadInvites();
-    }, []);
+    const isFounder = await hasWorkspaceAccess("founder");
+
+    if (!isFounder) {
+      window.location.href = "/dashboard";
+      return;
+    }
+
+    setAuthorized(true);
+
+    const { data, error } = await supabase
+      .from("invitation_codes")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setInvites(data || []);
+    setLoading(false);
+  }
+
+  loadBetaProgram();
+}, []);
 
     async function handleCreateInvitation() {
   try {
@@ -78,6 +97,19 @@ export default function FounderBetaPage() {
   } finally {
     setCreatingInvite(false);
   }
+}
+
+
+if (loading || !authorized) {
+  return (
+    <main className="min-h-screen bg-[#020617] text-white">
+      <section className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6">
+        <p className="font-black text-[#FBBF24]">
+          Loading Beta Program...
+        </p>
+      </section>
+    </main>
+  );
 }
 
   return (
