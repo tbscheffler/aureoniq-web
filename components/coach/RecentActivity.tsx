@@ -6,12 +6,12 @@ type RecentActivityProps = {
 
 export default function RecentActivity({ activity }: RecentActivityProps) {
   return (
-    <DashboardCard eyebrow="RECENT ACTIVITY" title="Workspace Activity">
+    <DashboardCard eyebrow="RECENT ACTIVITY" title="Workspace Activity" className="h-full">
 
       {activity.length === 0 ? (
         <p className="mt-6 text-slate-400">No recent activity yet.</p>
       ) : (
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 max-h-[420px] space-y-4 overflow-y-auto pr-2">
           {activity.map((item) => (
             <div
               key={item.id}
