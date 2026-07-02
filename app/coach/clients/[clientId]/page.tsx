@@ -7,6 +7,8 @@ import {
   getOpenOrganizationClientActionItemCount,
   getNextOrganizationClientMeeting,
   getClientHealth,
+  createOrganizationClientNote,
+  getOrganizationClientNotes,
 } from "@/services/coachService";
 import {
   MetricCard,
@@ -26,6 +28,8 @@ import CoachAIQViewer from "@/components/coach/CoachAIQViewer";
 import ResumeReview from "@/components/coach/ResumeReview";
 import { buildCareerIntelligenceSummary } from "@/services/careerIntelligenceEngine";
 import CoachBriefing from "@/components/coach/CoachBriefing";
+import CoachNotesWorkspace from "@/components/coach/CoachNotesWorkspace";
+import CoachNotesHistory from "@/components/coach/CoachNotesHistory";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -38,6 +42,8 @@ export default function CoachClientWorkspacePage() {
     const [openActionItems, setOpenActionItems] = useState(0);
     const [nextMeeting, setNextMeeting] = useState<any>(null);
     const [clientHealth, setClientHealth] = useState<any>(null);
+    const [notes, setNotes] = useState<any[]>([]);
+    const [loadingNotes, setLoadingNotes] = useState(true);
 
   useEffect(() => {
     async function loadWorkspace() {
@@ -45,15 +51,18 @@ export default function CoachClientWorkspacePage() {
         const data = await getCoachClientSummary(clientId);
         setWorkspace(data);
 
-        const [actionCount, nextMeetingData, healthData] = await Promise.all([
+        const [actionCount, nextMeetingData, healthData, notesData] = await Promise.all([
           getOpenOrganizationClientActionItemCount(clientId),
           getNextOrganizationClientMeeting(clientId),
           getClientHealth(clientId),
+          getOrganizationClientNotes(clientId),
         ]);
 
         setOpenActionItems(actionCount);
         setNextMeeting(nextMeetingData);
         setClientHealth(healthData);
+        setNotes(notesData || []);
+        setLoadingNotes(false);
       } catch (err: any) {
         setError(err.message || "Unable to load client workspace.");
       } finally {
@@ -235,8 +244,19 @@ export default function CoachClientWorkspacePage() {
             ) : null}
 
             {activeSection === "notes" ? (
-              <CoachNotesSection organizationClientId={clientId} />
-            ) : null}
+            <div>
+              <CoachNotesWorkspace
+                initialNotes=""
+                onSave={async (notes) => {
+                  await createOrganizationClientNote(clientId, notes);
+                  const updatedNotes = await getOrganizationClientNotes(clientId);
+                  setNotes(updatedNotes || []);
+                }}
+              />
+
+    <CoachNotesHistory notes={notes} loading={loadingNotes} />
+  </div>
+) : null}
 
             {activeSection === "meetings" ? (
               <MeetingHistorySection organizationClientId={clientId} />
