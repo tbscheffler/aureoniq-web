@@ -3,38 +3,38 @@ import DashboardCard from "@/components/coach/DashboardCard";
 
 export default function QuickActions() {
   return (
-    <DashboardCard eyebrow="QUICK ACTIONS" title="Get Started">
+    <DashboardCard eyebrow="COACH COMMAND CENTER" title="Today's Priorities">
 
       <div className="mt-6 grid gap-4">
         
 
-        <ActionCard
-          href="/coach"
-          emoji="👤"
-          title="Invite Client"
-          description="Add a new client to your organization."
-        />
+      <ActionCard
+        href="#invite-client"
+        emoji="👤"
+        title="Invite Client"
+        description="Add a new client and start their sponsored AureonIQ access."
+      />
 
-        <ActionCard
-          href="/coach/team"
-          emoji="👥"
-          title="Invite Team Member"
-          description="Add another coach or administrator."
-        />
+      <ActionCard
+        href="#todays-agenda"
+        emoji="📅"
+        title="Today's Agenda"
+        description="Review meetings and overdue client actions for today."
+      />
 
-        <ActionCard
-          href="/coach"
-          emoji="📝"
-          title="Coach Notes"
-          description="Review and update coaching notes."
-        />
+      <ActionCard
+        href="#active-clients"
+        emoji="📝"
+        title="Open Client Workspace"
+        description="Choose a client to review notes, meetings, resume insights, and action items."
+      />
 
-        <ActionCard
-          href="/coach"
-          emoji="📅"
-          title="Meetings"
-          description="Manage upcoming coaching sessions."
-        />
+      <ActionCard
+        href="/coach/team"
+        emoji="👥"
+        title="Invite Team Member"
+        description="Add another coach or administrator to your workspace."
+      />
 
       </div>
       </DashboardCard>

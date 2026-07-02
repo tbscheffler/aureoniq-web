@@ -195,10 +195,12 @@ export default function CoachPage() {
         planName={plan?.plan_type || "Free Beta"}
       />
 
-        <TodaysAgenda
-          meetings={todaysMeetings}
-          overdueActions={agendaStats?.overdueActions ?? 0}
-        />
+        <div id="todays-agenda">
+          <TodaysAgenda
+            meetings={todaysMeetings}
+            overdueActions={agendaStats?.overdueActions ?? 0}
+          />
+        </div>
 
         <CoachMetrics
           activeClients={stats?.activeClients ?? activeClients}
@@ -226,19 +228,23 @@ export default function CoachPage() {
           <RecentActivity activity={activity} />
         </div>
 
-        <InviteClientCard
-          clientEmail={clientEmail}
-          setClientEmail={setClientEmail}
-          sendingInvite={sendingInvite}
-          handleInviteClient={handleInviteClient}
-        />
+        <div id="invite-client">
+          <InviteClientCard
+            clientEmail={clientEmail}
+            setClientEmail={setClientEmail}
+            sendingInvite={sendingInvite}
+            handleInviteClient={handleInviteClient}
+          />
+        </div>
 
         <PendingInvitations
           invitations={invitations}
           handleRevokeInvitation={handleRevokeInvitation}
         />
 
-        <ActiveClients clients={clients} />
+        <div id="active-clients">
+          <ActiveClients clients={clients} />
+        </div>
         </section>
         </CoachShell>
   );
