@@ -830,3 +830,18 @@ export async function getCoachDashboard(organizationId: string) {
 
   return data;
 }
+
+export async function endOrganizationClientRelationship(
+  organizationClientId: string
+) {
+  const { error } = await supabase.rpc(
+    "end_organization_client_relationship",
+    {
+      p_organization_client_id: organizationClientId,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+}

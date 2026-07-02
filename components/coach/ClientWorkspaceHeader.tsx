@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { endOrganizationClientRelationship } from "@/services/coachService";
 
 type Props = {
   client: any;
@@ -27,6 +31,29 @@ const name =
   "Client";
 
 const isSampleClient = Boolean(client?.is_sample);
+const [endingRelationship, setEndingRelationship] = useState(false);
+
+async function handleEndRelationship() {
+  const confirmed = window.confirm(
+    "End this coaching relationship? This will remove the client from your active roster and end their sponsored access. Their AureonIQ account and data will not be deleted."
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setEndingRelationship(true);
+
+    await endOrganizationClientRelationship(client.id);
+
+    alert("Coaching relationship ended.");
+
+    window.location.href = "/coach";
+  } catch (error: any) {
+    alert(error.message || "Unable to end coaching relationship.");
+  } finally {
+    setEndingRelationship(false);
+  }
+}
 
   return (
     <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
@@ -91,9 +118,21 @@ const isSampleClient = Boolean(client?.is_sample);
         </div>
         </div>
 
-        <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-5 py-2 font-bold text-emerald-300">
-          Active Client
-        </span>
+        <div className="flex flex-col items-start gap-3 md:items-end">
+          <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-5 py-2 font-bold text-emerald-300">
+            Active Client
+          </span>
+
+          {!isSampleClient ? (
+            <button
+              onClick={handleEndRelationship}
+              disabled={endingRelationship}
+              className="rounded-2xl border border-red-400/40 px-4 py-2 text-sm font-black text-red-300 hover:bg-red-400/10 disabled:opacity-60"
+            >
+              {endingRelationship ? "Ending..." : "End Coaching Relationship"}
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );
