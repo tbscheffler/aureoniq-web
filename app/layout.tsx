@@ -19,8 +19,33 @@ export const metadata: Metadata = {
   title: "AureonIQ",
   description:
     "AI-powered career discovery platform helping professionals uncover hidden opportunities, career paths, and future growth potential.",
-};
 
+  openGraph: {
+    title: "AureonIQ",
+    description:
+      "Career Intelligence for Modern Career Coaches. Discover opportunities your clients didn't know they qualified for.",
+    url: "https://www.aureoniq.com",
+    siteName: "AureonIQ",
+    images: [
+      {
+        url: "/images/social/coach-beta-preview.png",
+        width: 1600,
+        height: 900,
+        alt: "AureonIQ Career Intelligence Platform",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "AureonIQ",
+    description:
+      "Career Intelligence for Modern Career Coaches.",
+    images: ["/images/social/coach-beta-preview.png"],
+  },
+};
 export default function RootLayout({
   children,
 }: Readonly<{
