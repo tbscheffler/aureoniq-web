@@ -296,6 +296,54 @@ export async function getOrganizationClientActionItems(
   return data || [];
 }
 
+export async function createOrganizationClientCoachingSession({
+  organizationClientId,
+  title,
+  scheduledFor,
+  meetingType,
+  location,
+}: {
+  organizationClientId: string;
+  title?: string;
+  scheduledFor?: string;
+  meetingType?: string;
+  location?: string;
+}) {
+  const { data, error } = await supabase.rpc(
+    "create_organization_client_coaching_session",
+    {
+      p_organization_client_id: organizationClientId,
+      p_title: title ?? "Coaching Session",
+      p_scheduled_for: scheduledFor ?? null,
+      p_meeting_type: meetingType ?? null,
+      p_location: location ?? null,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function getOrganizationClientCoachingSessions(
+  organizationClientId: string
+) {
+  const { data, error } = await supabase.rpc(
+    "get_organization_client_coaching_sessions",
+    {
+      p_organization_client_id: organizationClientId,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
 export async function sendOrganizationMemberInvitation({
   organizationId,
   inviteEmail,

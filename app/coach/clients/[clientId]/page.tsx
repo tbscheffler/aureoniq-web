@@ -30,6 +30,7 @@ import { buildCareerIntelligenceSummary } from "@/services/careerIntelligenceEng
 import CoachBriefing from "@/components/coach/CoachBriefing";
 import CoachNotesWorkspace from "@/components/coach/CoachNotesWorkspace";
 import CoachNotesHistory from "@/components/coach/CoachNotesHistory";
+import CoachingSessionsSection from "@/components/coach/CoachingSessionsSection";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -257,6 +258,10 @@ export default function CoachClientWorkspacePage() {
     <CoachNotesHistory notes={notes} loading={loadingNotes} />
   </div>
 ) : null}
+
+            {activeSection === "sessions" ? (
+              <CoachingSessionsSection organizationClientId={clientId} />
+            ) : null}
 
             {activeSection === "meetings" ? (
               <MeetingHistorySection organizationClientId={clientId} />

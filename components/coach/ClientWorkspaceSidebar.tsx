@@ -35,6 +35,11 @@ const sections = [
     description: "Private coaching observations",
   },
   {
+    key: "sessions",
+    label: "Coaching Sessions",
+    description: "Plan, conduct, and review coaching sessions",
+  },
+  {
     key: "meetings",
     label: "Meetings",
     description: "Session history and follow-ups",
