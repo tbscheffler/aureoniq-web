@@ -13,6 +13,8 @@ const displayName =
   "Client";
 
   const isSampleClient = Boolean(client.is_sample);
+  const healthScore = client.health?.score;
+  const healthStatus = client.health?.status;
 
   return (
     <div className="rounded-3xl border border-slate-800 bg-[#020617] p-5 transition hover:border-[#FBBF24]/60">
@@ -31,9 +33,21 @@ const displayName =
               label={isSampleClient ? "Demo Workspace" : "Active"}
               tone={isSampleClient ? "gold" : "green"}
             />
-            <StatusPill label="Resume Pending" tone="slate" />
-            <StatusPill label="Assessment Pending" tone="gold" />
-            <StatusPill label="AIQ Pending" tone="slate" />
+
+            {healthScore ? (
+              <StatusPill
+                label={`Health ${healthScore} · ${healthStatus}`}
+                tone={
+                  healthScore >= 80
+                    ? "green"
+                    : healthScore >= 60
+                    ? "gold"
+                    : "slate"
+                }
+              />
+            ) : (
+              <StatusPill label="Health Not Scored" tone="slate" />
+            )}
           </div>
         </div>
 

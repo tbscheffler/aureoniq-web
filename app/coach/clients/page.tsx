@@ -12,6 +12,7 @@ import {
   getPendingInvitations,
   sendOrganizationInvitation,
   revokeOrganizationInvitation,
+  getClientHealth,
 } from "@/services/coachService";
 import SearchBar from "@/components/coach/SearchBar";
 
@@ -82,16 +83,23 @@ const sortedClients = [...filteredClients].sort((a, b) => {
         ? membership.organizations[0]
         : membership.organizations;
 
-      const [planData, clientData, inviteData] = await Promise.all([
-        getOrganizationPlan(organizationId),
-        getOrganizationClients(organizationId),
-        getPendingInvitations(organizationId),
-      ]);
+const [planData, clientData, inviteData] = await Promise.all([
+  getOrganizationPlan(organizationId),
+  getOrganizationClients(organizationId),
+  getPendingInvitations(organizationId),
+]);
 
-      setOrganization(orgData);
-      setPlan(planData);
-      setClients(clientData || []);
-      setInvitations(inviteData || []);
+const clientsWithHealth = await Promise.all(
+  (clientData || []).map(async (client) => ({
+    ...client,
+    health: await getClientHealth(client.id),
+  }))
+);
+
+setOrganization(orgData);
+setPlan(planData);
+setClients(clientsWithHealth);
+setInvitations(inviteData || []);
     } catch (error: any) {
       alert(error.message || "Unable to load clients.");
     } finally {
