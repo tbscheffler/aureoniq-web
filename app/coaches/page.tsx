@@ -26,16 +26,16 @@ const productSections = [
     image: "/coach/client-workspace.png",
   },
   {
-    eyebrow: "AI RESUME REVIEW",
-    title: "AI prepares the review. The coach leads the conversation.",
-    text: "AureonIQ highlights strengths, ATS concerns, improvement areas, and coaching opportunities without rewriting for the client.",
-    image: "/coach/resume-review.png",
+    eyebrow: "COACHING SESSIONS",
+    title: "Turn every meeting into a structured coaching workflow.",
+    text: "Create sessions, capture notes, assign action items, and complete coaching work inside one focused workspace.",
+    image: "/coach/session-workspace.png",
   },
   {
-    eyebrow: "FUTURE POTENTIAL",
-    title: "Help clients see where their career can go next.",
-    text: "AIQ reports surface growth paths, market position, career trajectory, and hidden opportunities.",
-    image: "/coach/aiq-report.png",
+    eyebrow: "CAREER INTELLIGENCE",
+    title: "See the complete picture before every coaching session.",
+    text: "Career Assessments, AIQ, Resume Intelligence, Career Journey, and coaching insights come together in one organized workspace so you're always prepared.",
+    image: "/coach/career-intelligence-overview.png",
   },
 ];
 
@@ -132,6 +132,37 @@ export default function CoachesPage() {
           title="Track measurable progress"
           text="Follow client growth across coaching sessions, action plans, and Career Intelligence over time."
         />
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 pb-24">
+        <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8 md:p-10">
+          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+            HOW COACHES USE AUREONIQ
+          </p>
+
+          <h2 className="mt-4 max-w-3xl text-4xl font-black leading-tight">
+            From client intake to completed coaching session.
+          </h2>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-4">
+            {[
+              ["1", "Invite a client", "Bring clients into a secure shared workspace."],
+              ["2", "Review intelligence", "See assessments, AIQ, resume insights, and career history."],
+              ["3", "Run the session", "Capture notes, action items, and next steps in one place."],
+              ["4", "Track progress", "Follow client momentum across sessions and action plans."],
+            ].map(([num, title, text]) => (
+              <div key={num} className="rounded-2xl border border-slate-800 bg-[#020617] p-6">
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#FBBF24] text-lg font-black text-[#020617]">
+                  {num}
+                </div>
+
+                <h3 className="text-lg font-black">{title}</h3>
+
+                <p className="mt-3 text-sm leading-6 text-slate-400">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl space-y-20 px-6 pb-24">

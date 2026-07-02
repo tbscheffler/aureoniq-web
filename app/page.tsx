@@ -60,7 +60,7 @@ export default function Home() {
         <div className="relative mx-auto max-w-sm">
           <div className="absolute inset-0 rounded-[3rem] bg-[#FBBF24]/20 blur-3xl" />
           <img
-            src="/screenshots/home.png"
+            src="/screenshots/professional-home.png"
             alt="AureonIQ mobile app home screen"
             className="relative rounded-[2.5rem] border border-slate-700 shadow-2xl"
           />
@@ -192,18 +192,35 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-24 text-center">
-        <p className="mb-4 text-sm font-black tracking-[0.3em] text-[#FBBF24]">
-          CAREER INTELLIGENCE ECOSYSTEM
-        </p>
-        <h2 className="text-4xl font-black md:text-5xl">
-          Career Intelligence for professionals. Coaching Intelligence for coaches.
-        </h2>
-        <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-300">
-          AureonIQ is growing into a career intelligence platform for individuals,
-          career coaches, students, and institutions.
-        </p>
-      </section>
+<section className="mx-auto max-w-7xl px-6 py-24 text-center">
+  <p className="mb-4 text-sm font-black tracking-[0.3em] text-[#FBBF24]">
+    GET STARTED
+  </p>
+
+  <h2 className="text-4xl font-black md:text-5xl">
+    Whether you're building your career or helping others build theirs, AureonIQ is ready.
+  </h2>
+
+  <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+    Discover opportunities with Career Intelligence or streamline your coaching practice with a dedicated coaching workspace.
+  </p>
+
+  <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+    <a
+      href="YOUR_APP_STORE_LINK"
+      className="rounded-2xl bg-[#2563EB] px-8 py-4 font-black text-white transition hover:bg-blue-500"
+    >
+      Download the App
+    </a>
+
+    <a
+      href="/coaches"
+      className="rounded-2xl border border-slate-700 px-8 py-4 font-black text-white transition hover:border-[#FBBF24]"
+    >
+      Explore for Coaches
+    </a>
+  </div>
+</section>
       <FAQSection />
       <footer className="border-t border-slate-800 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 text-sm text-slate-400 md:flex-row md:justify-between">

@@ -13,6 +13,10 @@ export default function FounderPage() {
     savedJobs: 0,
     professionalSubs: 0,
     aiqProSubs: 0,
+    coachOrganizations: 0,
+    activeCoachClients: 0,
+    coachingSessions: 0,
+    completedCoachingSessions: 0,
     analyticsEvents: 0,
     analytics: {
       loginCompleted: 0,
@@ -49,6 +53,10 @@ if (!isFounder) {
         savedJobs,
         proSubs,
         aiqSubs,
+        coachOrganizations,
+        activeCoachClients,
+        coachingSessions,
+        completedCoachingSessions,
         events,
         analyticsEventsRaw,
       ] = await Promise.all([
@@ -65,8 +73,27 @@ if (!isFounder) {
           .select("id", { count: "exact", head: true })
           .eq("tier", "aiq_pro")
           .eq("status", "active"),
-        supabase.from("analytics_events").select("id", { count: "exact", head: true }),
-        supabase.from("analytics_events").select("event_name"),
+supabase
+  .from("organizations")
+  .select("id", { count: "exact", head: true })
+  .eq("type", "coach"),
+
+supabase
+  .from("organization_clients")
+  .select("id", { count: "exact", head: true })
+  .eq("status", "active"),
+
+supabase
+  .from("organization_client_coaching_sessions")
+  .select("id", { count: "exact", head: true }),
+
+supabase
+  .from("organization_client_coaching_sessions")
+  .select("id", { count: "exact", head: true })
+  .eq("status", "completed"),
+
+supabase.from("analytics_events").select("id", { count: "exact", head: true }),
+supabase.from("analytics_events").select("event_name"),
       ]);
 
       const eventCounts = {
@@ -97,15 +124,19 @@ if (!isFounder) {
         }
       });
 
-      setMetrics({
-        discoveryReports: discovery.count || 0,
-        aiqReports: aiq.count || 0,
-        savedJobs: savedJobs.count || 0,
-        professionalSubs: proSubs.count || 0,
-        aiqProSubs: aiqSubs.count || 0,
-        analyticsEvents: events.count || 0,
-        analytics: eventCounts,
-      });
+  setMetrics({
+    discoveryReports: discovery.count || 0,
+    aiqReports: aiq.count || 0,
+    savedJobs: savedJobs.count || 0,
+    professionalSubs: proSubs.count || 0,
+    aiqProSubs: aiqSubs.count || 0,
+    coachOrganizations: coachOrganizations.count || 0,
+    activeCoachClients: activeCoachClients.count || 0,
+    coachingSessions: coachingSessions.count || 0,
+    completedCoachingSessions: completedCoachingSessions.count || 0,
+    analyticsEvents: events.count || 0,
+    analytics: eventCounts,
+  });
 
       setLoading(false);
     }
@@ -125,6 +156,13 @@ if (!isFounder) {
 
   const estimatedMRR =
     metrics.professionalSubs * 9.99 + metrics.aiqProSubs * 14.99;
+
+  const sessionCompletionRate =
+  metrics.coachingSessions > 0
+    ? Math.round(
+        (metrics.completedCoachingSessions / metrics.coachingSessions) * 100
+      )
+    : 0;
 
   return (
     <main className="min-h-screen bg-[#020617] text-white">
@@ -148,12 +186,13 @@ if (!isFounder) {
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <MetricCard title="Coach Organizations" value={metrics.coachOrganizations} />
+          <MetricCard title="Active Coach Clients" value={metrics.activeCoachClients} />
+          <MetricCard title="Coaching Sessions" value={metrics.coachingSessions} />
+          <MetricCard title="Completed Sessions" value={metrics.completedCoachingSessions} />
+          <MetricCard title="Session Completion Rate" value={sessionCompletionRate} suffix="%" />
           <MetricCard title="Discovery Reports" value={metrics.discoveryReports} />
           <MetricCard title="AIQ Reports" value={metrics.aiqReports} />
-          <MetricCard title="Saved Jobs" value={metrics.savedJobs} />
-          <MetricCard title="Professional Subscribers" value={metrics.professionalSubs} />
-          <MetricCard title="AIQ Pro Subscribers" value={metrics.aiqProSubs} />
-          <MetricCard title="Analytics Events" value={metrics.analyticsEvents} />
         </div>
 
         <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
@@ -169,43 +208,60 @@ if (!isFounder) {
             Based on active Supabase entitlements. RevenueCat should remain the source of truth for billing.
           </p>
         </div>
-        <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            FOUNDER INSIGHTS
-          </p>
+<div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
+  <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+    COACH ALPHA
+  </p>
 
-          <div className="mt-6 space-y-4 text-slate-300">
-            <p>
-              • {metrics.analytics.loginCompleted} completed logins.
-            </p>
+  <div className="mt-6 space-y-4 text-slate-300">
 
-            <p>
-              • {metrics.analytics.resumeUploaded} users uploaded resumes.
-            </p>
+    <p>
+      🏢 {metrics.coachOrganizations} coach organizations created
+    </p>
 
-            <p>
-              • {metrics.analytics.discoveryCompleted} Discovery Reports were generated.
-            </p>
+    <p>
+      👥 {metrics.activeCoachClients} active coach clients
+    </p>
 
-            <p>
-              • {metrics.analytics.upgradeClicked} upgrade screens were viewed.
-            </p>
+    <p>
+      📅 {metrics.coachingSessions} coaching sessions created
+    </p>
 
-            <p>
-              • {metrics.analytics.purchaseCompleted} purchases were completed.
-            </p>
-          </div>
-        </div>
+    <p>
+      ✅ {metrics.completedCoachingSessions} coaching sessions completed
+    </p>
+
+    <p>
+      📄 {metrics.discoveryReports} Discovery Reports generated
+    </p>
+
+    <p>
+      🧠 {metrics.aiqReports} AIQ Reports generated
+    </p>
+
+  </div>
+</div>
       </section>
     </main>
   );
 }
 
-function MetricCard({ title, value }: { title: string; value: number }) {
+function MetricCard({
+  title,
+  value,
+  suffix = "",
+}: {
+  title: string;
+  value: number;
+  suffix?: string;
+}) {
   return (
     <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
       <p className="text-sm font-bold text-slate-400">{title}</p>
-      <p className="mt-4 text-4xl font-black text-[#FBBF24]">{value}</p>
+      <p className="mt-4 text-4xl font-black text-[#FBBF24]">
+  {value}
+  {suffix}
+</p>
     </div>
   );
 }
