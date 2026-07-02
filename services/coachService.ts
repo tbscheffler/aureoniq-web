@@ -344,6 +344,46 @@ export async function getOrganizationClientCoachingSessions(
   return data || [];
 }
 
+export async function getOrganizationClientCoachingSession(
+  sessionId: string
+) {
+  const { data, error } = await supabase
+    .from("organization_client_coaching_sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+export async function updateOrganizationClientCoachingSessionNotes({
+  sessionId,
+  sessionNotes,
+}: {
+  sessionId: string;
+  sessionNotes: string;
+}) {
+  const { data, error } = await supabase
+    .from("organization_client_coaching_sessions")
+    .update({
+      session_notes: sessionNotes,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", sessionId)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
 export async function sendOrganizationMemberInvitation({
   organizationId,
   inviteEmail,

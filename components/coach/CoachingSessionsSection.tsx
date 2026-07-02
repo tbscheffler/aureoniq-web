@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   createOrganizationClientCoachingSession,
   getOrganizationClientCoachingSessions,
@@ -13,6 +14,7 @@ type CoachingSessionsSectionProps = {
 export default function CoachingSessionsSection({
   organizationClientId,
 }: CoachingSessionsSectionProps) {
+    const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [sessions, setSessions] = useState<any[]>([]);
@@ -83,6 +85,17 @@ export default function CoachingSessionsSection({
             ? new Date(session.scheduled_for).toLocaleDateString()
             : "No date set"}
         </p>
+        <button
+        type="button"
+        onClick={() =>
+            router.push(
+            `/coach/clients/${organizationClientId}/sessions/${session.id}`
+            )
+        }
+        className="mt-4 rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-[#FBBF24] hover:text-[#FBBF24]"
+        >
+        Open Session
+        </button>
       </div>
     ))}
   </div>
