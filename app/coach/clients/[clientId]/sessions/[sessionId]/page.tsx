@@ -9,6 +9,7 @@ import {
   getOrganizationClientActionItems,
   getOrganizationClientCoachingSession,
   updateOrganizationClientCoachingSessionNotes,
+  completeOrganizationClientCoachingSession,
 } from "@/services/coachService";
 
 export default function CoachingSessionWorkspacePage() {
@@ -27,6 +28,8 @@ export default function CoachingSessionWorkspacePage() {
     const [savingAction, setSavingAction] = useState(false);
     const [actionMessage, setActionMessage] = useState("");
     const [sessionActionItems, setSessionActionItems] = useState<any[]>([]);
+    const [completingSession, setCompletingSession] = useState(false);
+    const [completeMessage, setCompleteMessage] = useState("");
 
   useEffect(() => {
     async function loadSession() {
@@ -100,6 +103,26 @@ export default function CoachingSessionWorkspacePage() {
   }
 }
 
+async function handleCompleteSession() {
+  try {
+    setCompletingSession(true);
+    setCompleteMessage("");
+
+    await completeOrganizationClientCoachingSession(sessionId);
+
+    const updatedSession =
+      await getOrganizationClientCoachingSession(sessionId);
+
+    setSession(updatedSession);
+
+    setCompleteMessage("Session completed.");
+  } catch (err: any) {
+    setCompleteMessage(err.message || "Unable to complete session.");
+  } finally {
+    setCompletingSession(false);
+  }
+}
+
 
   return (
     <CoachShell>
@@ -145,6 +168,14 @@ export default function CoachingSessionWorkspacePage() {
               <p className="mt-1 text-slate-300">
                 {session?.location || "Not set"}
               </p>
+              {session?.completed_at ? (
+                <>
+                    <p className="mt-4 text-sm text-slate-500">Completed At</p>
+                    <p className="mt-1 text-slate-300">
+                    {new Date(session.completed_at).toLocaleString()}
+                    </p>
+                </>
+                ) : null}
             </div>
 
             <div className="mt-6 rounded-2xl border border-slate-800 bg-[#020617] p-5">
@@ -220,6 +251,34 @@ export default function CoachingSessionWorkspacePage() {
 
             {actionMessage ? (
                 <p className="mt-3 text-sm text-slate-400">{actionMessage}</p>
+            ) : null}
+            </div>
+            <div className="mt-6 rounded-2xl border border-slate-800 bg-[#020617] p-5">
+            <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+                COMPLETE SESSION
+            </p>
+
+            <h2 className="mt-3 text-xl font-black">Finish this coaching session</h2>
+
+            <p className="mt-2 text-sm text-slate-400">
+                Mark this session complete once notes and action items are captured.
+            </p>
+
+            <button
+            type="button"
+            onClick={handleCompleteSession}
+            disabled={completingSession || session?.status === "completed"}
+            className="mt-4 rounded-xl bg-[#FBBF24] px-5 py-3 text-sm font-black text-[#020617] disabled:opacity-60"
+            >
+            {session?.status === "completed"
+                ? "Session Completed"
+                : completingSession
+                ? "Completing..."
+                : "Complete Session"}
+            </button>
+
+            {completeMessage ? (
+            <p className="mt-3 text-sm text-slate-400">{completeMessage}</p>
             ) : null}
             </div>
           </>

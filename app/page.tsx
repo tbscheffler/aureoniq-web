@@ -16,10 +16,10 @@ export default function Home() {
         </div>
 
         <a
-          href="#download"
+          href="/coaches"
           className="rounded-xl bg-[#FBBF24] px-5 py-3 text-sm font-black text-[#020617]"
         >
-          Download
+          For Coaches
         </a>
       </nav>
 
@@ -34,30 +34,27 @@ export default function Home() {
           </h1>
 
           <p className="mt-6 max-w-xl text-xl leading-8 text-slate-300">
-            AureonIQ analyzes your experience to uncover hidden career paths,
-            market value, career mobility, and future growth opportunities.
+            AureonIQ turns career experience into actionable Career Intelligence,
+            helping professionals discover opportunities and helping coaches guide
+            better career decisions.
           </p>
 
           <div className="mt-9 flex flex-col gap-4 sm:flex-row">
             <a
               id="download"
-              href="#"
+              href="https://apps.apple.com/us/app/aureoniq/id6782241168"
               className="rounded-2xl bg-[#2563EB] px-7 py-4 text-center font-black text-white transition hover:bg-blue-500"
             >
               Download on the App Store
             </a>
 
             <a
-              href="#how-it-works"
+              href="/coaches"
               className="rounded-2xl border border-slate-700 px-7 py-4 text-center font-black text-white transition hover:border-[#FBBF24]"
             >
-              See How It Works
+              For Career Coaches
             </a>
           </div>
-
-          <p className="mt-4 text-sm text-slate-400">
-            AureonIQ for iOS is currently in Apple review.
-          </p>
         </div>
 
         <div className="relative mx-auto max-w-sm">
@@ -72,14 +69,15 @@ export default function Home() {
 
       <section className="border-y border-slate-800 bg-[#07111f]">
         <div className="mx-auto max-w-5xl px-6 py-20 text-center">
-          <h2 className="text-4xl font-black md:text-5xl">
-            Most people don&apos;t have a resume problem.
-          </h2>
-          <p className="mx-auto mt-5 max-w-3xl text-xl leading-8 text-slate-300">
-            They have an opportunity visibility problem. Job boards only show
-            what you search for. AureonIQ reveals the paths hiding inside your
-            actual experience.
-          </p>
+        <h2 className="text-4xl font-black md:text-5xl">
+          Your experience is worth more than your next job title.
+        </h2>
+
+        <p className="mx-auto mt-5 max-w-3xl text-xl leading-8 text-slate-300">
+          AureonIQ transforms your work history into Career Intelligence, revealing
+          opportunities, transferable skills, career mobility, and growth paths that
+          traditional resumes and job boards often miss.
+        </p>
         </div>
       </section>
 
@@ -196,10 +194,10 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-6 py-24 text-center">
         <p className="mb-4 text-sm font-black tracking-[0.3em] text-[#FBBF24]">
-          COMING SOON
+          CAREER INTELLIGENCE ECOSYSTEM
         </p>
         <h2 className="text-4xl font-black md:text-5xl">
-          Built for professionals today. Expanding for Coaches and Universities next.
+          Career Intelligence for professionals. Coaching Intelligence for coaches.
         </h2>
         <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-300">
           AureonIQ is growing into a career intelligence platform for individuals,

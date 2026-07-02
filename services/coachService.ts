@@ -935,3 +935,20 @@ export async function endOrganizationClientRelationship(
     throw error;
   }
 }
+
+export async function completeOrganizationClientCoachingSession(
+  sessionId: string
+) {
+  const { data, error } = await supabase.rpc(
+    "complete_organization_client_coaching_session",
+    {
+      p_session_id: sessionId,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

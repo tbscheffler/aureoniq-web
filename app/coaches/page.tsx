@@ -76,13 +76,13 @@ export default function CoachesPage() {
         </p>
 
         <h1 className="mt-6 max-w-5xl text-5xl font-black leading-tight md:text-7xl">
-          Spend less time preparing. More time coaching.
+          Run your coaching practice from one Career Intelligence workspace.
         </h1>
 
         <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-300">
-          AureonIQ gives coaches an AI-prepared client workspace for resume
-          reviews, career intelligence, coaching notes, meetings, and action
-          items. AI prepares. Coach decides. Client succeeds.
+          AureonIQ helps career coaches manage clients, review career intelligence,
+          capture coaching notes, organize sessions, and turn insight into action.
+          AI prepares the context. Coaches lead the conversation.
         </p>
 
         <div className="mt-10 flex flex-wrap gap-4">
@@ -119,18 +119,18 @@ export default function CoachesPage() {
 
       <section className="mx-auto grid max-w-7xl gap-6 px-6 pb-20 md:grid-cols-3">
         <ValueCard
-          title="AI prepares"
-          text="AureonIQ organizes resume reviews, reports, client context, and next steps before the session."
+          title="Everything in one place"
+          text="Clients, coaching sessions, notes, action items, and Career Intelligence stay organized in a single workspace."
         />
 
         <ValueCard
-          title="Coach decides"
-          text="AI findings become coaching context, not automatic rewrites or replacement advice."
+          title="AI accelerates preparation"
+          text="AureonIQ organizes career insights before the meeting so you can spend more time coaching instead of preparing."
         />
 
         <ValueCard
-          title="Client succeeds"
-          text="Clients get clearer direction, stronger documents, and a more prepared coaching experience."
+          title="Track measurable progress"
+          text="Follow client growth across coaching sessions, action plans, and Career Intelligence over time."
         />
       </section>
 

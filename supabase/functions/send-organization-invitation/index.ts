@@ -151,16 +151,90 @@ serve(async (req) => {
         to: [client_email],
         subject: `${org?.name || "Your coach"} invited you to AureonIQ`,
         html: `
-          <h2>You have been invited to connect with your career coach</h2>
-          <p>${org?.name || "Your coach"} invited you to collaborate inside AureonIQ.</p>
-          <p>If you accept, your coach can view your Career Discovery Reports and AIQ Reports.</p>
-          <p>Your password, billing, and account settings remain private.</p>
-          <p>
-            <a href="${acceptUrl}" style="background:#FBBF24;color:#020617;padding:12px 18px;text-decoration:none;border-radius:10px;font-weight:bold;">
-              Accept Invitation
-            </a>
-          </p>
-        `,
+            <div style="background:#0F172A;padding:40px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#E5E7EB;">
+              <div style="max-width:640px;margin:0 auto;background:#111827;border:1px solid #334155;border-radius:20px;overflow:hidden;">
+
+                <div style="padding:36px 40px;border-bottom:1px solid #1E293B;text-align:center;">
+                  <div style="font-size:30px;font-weight:800;color:#FBBF24;letter-spacing:3px;">
+                    AUREONIQ
+                  </div>
+
+                  <div style="margin-top:10px;font-size:14px;color:#94A3B8;letter-spacing:2px;text-transform:uppercase;">
+                    Career Intelligence Platform
+                  </div>
+                </div>
+
+                <div style="padding:40px;">
+
+                  <h1 style="margin:0;font-size:28px;color:white;">
+                    You're invited to work with your career coach.
+                  </h1>
+
+                  <p style="margin-top:24px;font-size:16px;line-height:1.7;color:#CBD5E1;">
+                    <strong>${org?.name || "Your coach"}</strong> has invited you to collaborate inside AureonIQ.
+                  </p>
+
+                  <p style="margin-top:20px;font-size:16px;line-height:1.7;color:#CBD5E1;">
+                    AureonIQ helps you and your coach organize your career journey, discover opportunities, review Career Intelligence, and track progress together.
+                  </p>
+
+                  <div style="margin-top:32px;padding:24px;border-radius:16px;background:#0F172A;border:1px solid #334155;">
+
+                    <div style="font-weight:700;color:white;margin-bottom:16px;">
+                      What happens when you accept?
+                    </div>
+
+                    <div style="color:#CBD5E1;line-height:2;">
+                      ✓ Connect securely with your coach<br>
+                      ✓ Share Career Discovery and AIQ reports<br>
+                      ✓ Collaborate on coaching sessions<br>
+                      ✓ Track goals and action items together
+                    </div>
+
+                  </div>
+
+                  <div style="margin-top:36px;text-align:center;">
+                    <a
+                      href="${acceptUrl}"
+                      style="
+                        display:inline-block;
+                        background:#2563EB;
+                        color:white;
+                        padding:16px 30px;
+                        border-radius:14px;
+                        text-decoration:none;
+                        font-weight:700;
+                        font-size:16px;
+                      "
+                    >
+                      Accept Invitation
+                    </a>
+                  </div>
+
+                  <div style="margin-top:40px;padding-top:28px;border-top:1px solid #1E293B;">
+
+                    <div style="font-weight:700;color:white;margin-bottom:12px;">
+                      Your privacy matters
+                    </div>
+
+                    <div style="font-size:14px;line-height:1.8;color:#94A3B8;">
+                      • Your password is never shared with your coach.<br>
+                      • Billing information remains private.<br>
+                      • You control your AureonIQ account.
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div style="text-align:center;margin-top:20px;font-size:13px;color:#64748B;">
+                AureonIQ • Career Intelligence Platform
+              </div>
+
+            </div>
+            `,
       }),
     });
 
