@@ -18,12 +18,14 @@ import {
 } from "@/components/coach";
 import ClientWorkspaceHeader from "@/components/coach/ClientWorkspaceHeader";
 import CoachShell from "@/components/coach/CoachShell";
-import ClientTimeline from "@/components/coach/ClientTimeline";
+import CareerJourneyTimeline from "@/components/coach/CareerJourneyTimeline";
 import ClientOverview from "@/components/coach/ClientOverview";
 import { getCareerIntelligenceSummary } from "@/services/careerIntelligenceService";
 import CoachReportViewer from "@/components/coach/CoachReportViewer";
 import CoachAIQViewer from "@/components/coach/CoachAIQViewer";
 import ResumeReview from "@/components/coach/ResumeReview";
+import { buildCareerIntelligenceSummary } from "@/services/careerIntelligenceEngine";
+import CoachBriefing from "@/components/coach/CoachBriefing";
 
 export default function CoachClientWorkspacePage() {
     const params = useParams();
@@ -84,6 +86,63 @@ export default function CoachClientWorkspacePage() {
   const careerReports = workspace?.career_reports || [];
   const aiqReports = workspace?.aiq_reports || [];
 
+  const careerJourneyEvents = [
+  ...(workspace?.resume_profile
+    ? [
+        {
+          id: `resume-${workspace.resume_profile.id}`,
+          title: "Resume profile created",
+          description: "The client’s resume was parsed into their AureonIQ career profile.",
+          date: formatJourneyDate(workspace.resume_profile.created_at),
+          type: "resume" as const,
+        },
+      ]
+    : []),
+
+  ...careerReports.map((report: any) => ({
+    id: `career-report-${report.id}`,
+    title: "Career Assessment completed",
+    description: "Career paths, transferable skills, and opportunities were generated.",
+    date: formatJourneyDate(report.created_at),
+    type: "assessment" as const,
+  })),
+
+  ...aiqReports.map((report: any) => ({
+    id: `aiq-${report.id}`,
+    title: "Future Potential report completed",
+    description: "AIQ career intelligence was generated for this client.",
+    date: formatJourneyDate(report.created_at),
+    type: "aiq" as const,
+  })),
+
+  ...(nextMeeting
+    ? [
+        {
+          id: `meeting-${nextMeeting.id}`,
+          title: "Next coaching session scheduled",
+          description: nextMeeting.title || "A coaching session is scheduled.",
+          date: formatJourneyDate(nextMeeting.meeting_date),
+          type: "meeting" as const,
+        },
+      ]
+    : []),
+].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const clientName =
+  workspace?.client?.client_profile?.display_name ||
+  workspace?.client?.client_email ||
+  "Client";
+
+  const careerIntelligence = buildCareerIntelligenceSummary({
+    clientName,
+    careerHealth: clientHealth,
+    hasDiscoveryReport: careerReports.length > 0,
+    hasAIQReport: aiqReports.length > 0,
+    hasResumeProfile: Boolean(workspace?.resume_profile),
+    hasNextMeeting: Boolean(nextMeeting),
+    openActionItems,
+  });
+
   return (
     <CoachShell>
     <section>
@@ -113,43 +172,43 @@ export default function CoachClientWorkspacePage() {
             />
           </div>
 
+
+
   <div className="space-y-8">
+
+              <CoachBriefing
+            summary={careerIntelligence.summary}
+            recommendedNextStep={careerIntelligence.recommendedNextStep}
+          />
 
           {activeSection === "overview" ? (
           <ClientOverview
-                clientName={
-                  workspace?.client?.client_profile?.display_name ||
-                  workspace?.client?.client_email ||
-                  "Client"
-                }
-                hasDiscoveryReport={careerReports.length > 0}
-                hasAIQReport={aiqReports.length > 0}
-                openActionItems={openActionItems}
-                nextMeeting={
-                  nextMeeting
-                    ? {
-                        title: nextMeeting.title,
-                        meetingDate: nextMeeting.meeting_date,
-                      }
-                    : null
-                }
-              intelligence={{
-                careerHealth: clientHealth?.score ?? 0,
-                riskLevel:
-                  clientHealth?.status === "Excellent" || clientHealth?.status === "Strong"
-                    ? "Low"
-                    : clientHealth?.status === "Needs Attention"
-                    ? "Medium"
-                    : "High",
-                careerMomentum: clientHealth?.status || "Not Scored",
-                nextRecommendedAction:
-                  clientHealth?.status === "Excellent" || clientHealth?.status === "Strong"
-                    ? "This client is progressing well. Continue reinforcing the current coaching plan."
-                    : clientHealth?.status === "Needs Attention"
-                    ? "This client has several active career intelligence signals, but still needs follow-up."
-                    : "Start by completing the client's resume, assessment, or next coaching action.",
-              }}
-              />
+            clientName={clientName}
+            hasDiscoveryReport={careerReports.length > 0}
+            hasAIQReport={aiqReports.length > 0}
+            openActionItems={openActionItems}
+            nextMeeting={
+              nextMeeting
+                ? {
+                    title: nextMeeting.title,
+                    meetingDate: nextMeeting.meeting_date,
+                  }
+                : null
+            }
+            intelligence={{
+              careerHealth: clientHealth?.score ?? 0,
+              riskLevel:
+                clientHealth?.status === "Excellent" ||
+                clientHealth?.status === "Strong"
+                  ? "Low"
+                  : clientHealth?.status === "Needs Attention"
+                  ? "Medium"
+                  : "High",
+              careerMomentum: clientHealth?.status || "Not Scored",
+              nextRecommendedAction: careerIntelligence.recommendedNextStep,
+            }}
+            careerInsights={careerIntelligence.insights}
+          />
             ) : null}
 
             {activeSection === "discovery" ? (
@@ -172,7 +231,7 @@ export default function CoachClientWorkspacePage() {
             ) : null}
 
             {activeSection === "timeline" ? (
-              <ClientTimeline events={[]} />
+              <CareerJourneyTimeline events={careerJourneyEvents} />
             ) : null}
 
             {activeSection === "notes" ? (
@@ -194,7 +253,12 @@ export default function CoachClientWorkspacePage() {
 }
 
 
+function formatJourneyDate(dateValue: string) {
+  if (!dateValue) return "Unknown date";
 
-
-
-  
+  return new Date(dateValue).toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}

@@ -11,6 +11,7 @@ import {
   getTodaysCoachMeetings,
   ensureSampleClientForOrganization,
   getCoachDashboard,
+  getClientHealth,
 } from "@/services/coachService";
 import RecentActivity from "@/components/coach/RecentActivity";
 import CoachShell from "@/components/coach/CoachShell";
@@ -89,7 +90,14 @@ export default function CoachPage() {
 
       setOrganization(orgData);
       setPlan(planData);
-      setClients(clientData || []);
+            const clientsWithHealth = await Promise.all(
+        (clientData || []).map(async (client) => ({
+          ...client,
+          health: await getClientHealth(client.id),
+        }))
+      );
+
+      setClients(clientsWithHealth);
       setDashboardData(dashboardData);
       setStats(dashboardData?.stats || null);
       setActivity(activityData || []);

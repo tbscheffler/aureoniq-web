@@ -13,6 +13,11 @@ type ClientOverviewProps = {
     meetingDate: string;
   } | null;
   intelligence: CareerIntelligenceSummary;
+  careerInsights: {
+    label: string;
+    status: "positive" | "warning" | "critical" | "neutral";
+    message: string;
+  }[];
 };
 
 export default function ClientOverview({
@@ -22,6 +27,7 @@ export default function ClientOverview({
   openActionItems,
   nextMeeting,
   intelligence,
+  careerInsights,
 }: ClientOverviewProps) {
   return (
     <DashboardCard eyebrow="CAREER INTELLIGENCE" title="Client Snapshot">
@@ -64,33 +70,39 @@ export default function ClientOverview({
         </div>
     </div>
 
-    <div className="mt-6 rounded-2xl border border-slate-700 bg-[#020617] p-6">
-        <p className="text-sm font-black tracking-[0.2em] text-slate-500">
-            SNAPSHOT CHECKLIST
-        </p>
+<div className="mt-6 rounded-2xl border border-slate-700 bg-[#020617] p-6">
+  <p className="text-sm font-black tracking-[0.2em] text-slate-500">
+    CAREER INTELLIGENCE SIGNALS
+  </p>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-2">
-            <SnapshotItem
-            label="Career Assessment"
-            complete={hasDiscoveryReport}
-            />
-
-            <SnapshotItem
-            label="Future Potential"
-            complete={hasAIQReport}
-            />
-
-            <SnapshotItem
-            label="Upcoming Session"
-            complete={Boolean(nextMeeting)}
-            />
-
-            <SnapshotItem
-            label="No Outstanding Tasks"
-            complete={openActionItems === 0}
-            />
+  <div className="mt-5 space-y-3">
+    {careerInsights.map((insight) => (
+      <div
+        key={insight.label}
+        className="flex items-start justify-between gap-4 rounded-2xl border border-slate-800 bg-[#111827] p-4"
+      >
+        <div>
+          <p className="font-black text-white">{insight.label}</p>
+          <p className="mt-1 text-sm text-slate-400">{insight.message}</p>
         </div>
-        </div>
+
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-black uppercase ${
+            insight.status === "positive"
+              ? "bg-emerald-400/10 text-emerald-300"
+              : insight.status === "warning"
+              ? "bg-[#FBBF24]/10 text-[#FBBF24]"
+              : insight.status === "critical"
+              ? "bg-red-400/10 text-red-300"
+              : "bg-slate-700 text-slate-300"
+          }`}
+        >
+          {insight.status}
+        </span>
+      </div>
+    ))}
+  </div>
+</div>
 
     </div>
 

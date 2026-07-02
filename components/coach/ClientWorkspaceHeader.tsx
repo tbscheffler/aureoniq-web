@@ -58,10 +58,10 @@ async function handleEndRelationship() {
   return (
     <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
       <Link
-        href="/coach"
+        href="/coach/clients"
         className="text-sm font-bold text-[#FBBF24]"
       >
-        ← Back to Clients
+        ← Back to Client Directory
       </Link>
 
       <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
