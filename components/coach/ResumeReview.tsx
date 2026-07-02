@@ -6,6 +6,7 @@ import {
   getResumeSignedUrl,
   generateOrganizationClientResumeReview,
   getLatestOrganizationClientResumeReview,
+  getResumeReviewFindingNotes,
   saveResumeReviewFindingNote,
 } from "@/services/coachService";
 
@@ -22,6 +23,7 @@ type ResumeReviewProps = {
     const [reviewResult, setReviewResult] = useState<any>(null);
     const [loadingReview, setLoadingReview] = useState(true);
     const [resumeReviewId, setResumeReviewId] = useState<string | null>(null);
+    const [notesByFindingKey, setNotesByFindingKey] = useState<Record<string, string>>({});
     useEffect(() => {
         async function loadLatestReview() {
           try {
@@ -30,10 +32,19 @@ type ResumeReviewProps = {
                 organizationClientId
               );
       
-              if (latestReview) {
-                setReviewResult(latestReview.review_json);
-                setResumeReviewId(latestReview.id);
-              }
+          if (latestReview) {
+            setReviewResult(latestReview.review_json);
+            setResumeReviewId(latestReview.id);
+
+            const notes = await getResumeReviewFindingNotes(latestReview.id);
+
+            const noteMap = notes.reduce((acc: Record<string, string>, note: any) => {
+              acc[note.finding_key] = note.coach_note || "";
+              return acc;
+            }, {});
+
+            setNotesByFindingKey(noteMap);
+          }
           } catch (error) {
             console.log("LOAD RESUME REVIEW ERROR:", error);
           } finally {
@@ -175,6 +186,8 @@ type ResumeReviewProps = {
                 type="strength"
                 items={reviewResult.strengths}
                 resumeReviewId={resumeReviewId}
+                notesByFindingKey={notesByFindingKey}
+                setNotesByFindingKey={setNotesByFindingKey}
                 />
 
                 <ResumeReviewList
@@ -182,6 +195,8 @@ type ResumeReviewProps = {
                 type="improvement"
                 items={reviewResult.improvementAreas}
                 resumeReviewId={resumeReviewId}
+                notesByFindingKey={notesByFindingKey}
+                setNotesByFindingKey={setNotesByFindingKey}
                 />
 
                 <ResumeReviewList
@@ -189,6 +204,8 @@ type ResumeReviewProps = {
                 type="ats"
                 items={reviewResult.atsConcerns}
                 resumeReviewId={resumeReviewId}
+                notesByFindingKey={notesByFindingKey}
+                setNotesByFindingKey={setNotesByFindingKey}
                 />
 
                 <ResumeReviewList
@@ -196,6 +213,8 @@ type ResumeReviewProps = {
                 type="edit"
                 items={reviewResult.suggestedEdits}
                 resumeReviewId={resumeReviewId}
+                notesByFindingKey={notesByFindingKey}
+                setNotesByFindingKey={setNotesByFindingKey}
                 />
             </div>
             ) : null}
@@ -217,16 +236,20 @@ function ResumeField({ label, value }: { label: string; value: any }) {
 }
 
 function ResumeReviewList({
-    title,
-    type,
-    items,
-    resumeReviewId,
-  }: {
-    title: string;
-    type: string;
-    items?: any[];
-    resumeReviewId: string | null;
-  }) {
+  title,
+  type,
+  items,
+  resumeReviewId,
+  notesByFindingKey,
+  setNotesByFindingKey,
+}: {
+  title: string;
+  type: string;
+  items?: any[];
+  resumeReviewId: string | null;
+  notesByFindingKey: Record<string, string>;
+  setNotesByFindingKey: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+}) {
     if (!items || items.length === 0) return null;
   
     return (
@@ -258,10 +281,17 @@ function ResumeReviewList({
                   Suggested direction: {item.suggestedDirection}
                 </p>
               ) : null}
-              <CoachFindingNote
-                resumeReviewId={resumeReviewId}
-                findingKey={`${type}-${index}`}
-                />
+            <CoachFindingNote
+              resumeReviewId={resumeReviewId}
+              findingKey={`${type}-${index}`}
+              existingNote={notesByFindingKey[`${type}-${index}`] || ""}
+              onNoteSaved={(savedNote) => {
+                setNotesByFindingKey((current) => ({
+                  ...current,
+                  [`${type}-${index}`]: savedNote,
+                }));
+              }}
+            />
             </div>
           ))}
         </div>
@@ -269,16 +299,24 @@ function ResumeReviewList({
     );
   }
 
-  function CoachFindingNote({
-    resumeReviewId,
-    findingKey,
-  }: {
-    resumeReviewId: string | null;
-    findingKey: string;
-  }) {
-    const [note, setNote] = useState("");
-    const [saving, setSaving] = useState(false);
-    const [open, setOpen] = useState(false);
+function CoachFindingNote({
+  resumeReviewId,
+  findingKey,
+  existingNote,
+  onNoteSaved,
+}: {
+  resumeReviewId: string | null;
+  findingKey: string;
+  existingNote: string;
+  onNoteSaved: (savedNote: string) => void;
+}) {
+  const [note, setNote] = useState(existingNote);
+  const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setNote(existingNote);
+  }, [existingNote]);
   
     if (!resumeReviewId) return null;
   
@@ -288,13 +326,15 @@ function ResumeReviewList({
         try {
           setSaving(true);
   
-        await saveResumeReviewFindingNote({
-          resumeReviewId,
-          findingKey,
-          coachNote: note,
-        });
-  
-        alert("Coach note saved.");
+      await saveResumeReviewFindingNote({
+        resumeReviewId,
+        findingKey,
+        coachNote: note.trim(),
+      });
+
+      onNoteSaved(note.trim());
+      alert("Coach note saved.");
+      setOpen(false);
       } catch (error: any) {
         alert(error.message || "Unable to save coach note.");
       } finally {
@@ -309,7 +349,7 @@ function ResumeReviewList({
                   onClick={() => setOpen(true)}
                   className="rounded-2xl border border-slate-700 px-4 py-2 text-sm font-black text-slate-300 hover:border-[#FBBF24] hover:text-[#FBBF24]"
                 >
-                  Add Coach Note
+                  {existingNote ? "Edit Coach Note" : "Add Coach Note"}
                 </button>
               ) : (
                 <div className="rounded-2xl border border-slate-700 bg-[#111827] p-4">

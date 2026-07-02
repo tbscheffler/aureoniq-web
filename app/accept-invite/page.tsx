@@ -10,6 +10,7 @@ export default function AcceptInvitePage() {
   const [token, setToken] = useState<string | null>(null);
   const [invitation, setInvitation] = useState<any>(null);
   const [message, setMessage] = useState("");
+  const [accepted, setAccepted] = useState(false);
   const [clientDisplayName, setClientDisplayName] = useState("");
 
   useEffect(() => {
@@ -25,19 +26,26 @@ export default function AcceptInvitePage() {
 
       setToken(inviteToken);
 
-      const { data, error } = await supabase
-        .from("organization_invitations")
-        .select("id, client_email, status, expires_at, organizations(name)")
-        .eq("token", inviteToken)
-        .maybeSingle();
+const { data, error } = await supabase.rpc(
+  "get_organization_invitation_preview",
+  { invite_token: inviteToken }
+);
 
-      if (error || !data) {
-        setMessage("Invitation not found or no longer available.");
-        setLoading(false);
-        return;
-      }
+const invite = Array.isArray(data) ? data[0] : data;
 
-      setInvitation(data);
+if (error || !invite) {
+  setMessage("Invitation not found or no longer available.");
+  setLoading(false);
+  return;
+}
+
+setInvitation({
+  id: invite.id,
+  client_email: invite.client_email,
+  status: invite.status,
+  expires_at: invite.expires_at,
+  organizations: { name: invite.organization_name },
+});
       setLoading(false);
     }
 
@@ -53,24 +61,66 @@ export default function AcceptInvitePage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      setMessage("Please sign in first, then return to this invitation link.");
-      setAccepting(false);
-      return;
-    }
+if (!user) {
+  const returnUrl = encodeURIComponent(`/accept-invite?token=${token}`);
 
-    const { error } = await supabase.rpc("accept_organization_invitation", {
-      invite_token: token,
-      client_display_name_input: clientDisplayName.trim(),
-    });
+  const { data: hasAccount, error: accountCheckError } = await supabase.rpc(
+    "invited_email_has_account",
+    { invite_token: token }
+  );
 
-    if (error) {
-      setMessage(error.message);
-      setAccepting(false);
-      return;
-    }
+  if (accountCheckError) {
+    setMessage(
+      "We could not verify this invitation. Please try again or ask your coach to resend the invite."
+    );
+    setAccepting(false);
+    return;
+  }
 
-    setMessage("Invitation accepted. Your coach can now view your shared career reports.");
+  if (hasAccount) {
+    setMessage(
+      "This invitation is connected to an existing AureonIQ account. Please sign in using the email your coach invited."
+    );
+    window.location.href = `/login?redirect=${returnUrl}`;
+  } else {
+    setMessage(
+      "To accept this coach invitation, first create an AureonIQ account using the email your coach invited."
+    );
+    window.location.href = `/client-signup?redirect=${returnUrl}`;
+  }
+
+  setAccepting(false);
+  return;
+}
+
+const { data, error } = await supabase.rpc(
+  "accept_organization_invitation",
+  {
+    invite_token: token,
+    client_display_name_input: clientDisplayName.trim(),
+  }
+);
+
+console.log("RPC DATA:", data);
+console.log("RPC ERROR:", error);
+
+if (error) {
+  console.error(error);
+
+  setMessage(
+    error.message.includes("Invitation not found")
+      ? "This invitation has already been accepted, expired, or is no longer available. If you already connected with your coach, open the AureonIQ app and sign in with the same email."
+      : error.message
+  );
+
+  setAccepting(false);
+  return;
+}
+
+    setMessage(
+      "You're connected! Your coach can now view your shared AureonIQ career reports. Next, open the AureonIQ app and sign in with this same email."
+    );
+    setAccepted(true);
     setAccepting(false);
   }
 
@@ -87,6 +137,48 @@ export default function AcceptInvitePage() {
   const orgName = Array.isArray(invitation?.organizations)
     ? invitation.organizations[0]?.name
     : invitation?.organizations?.name;
+
+  if (accepted) {
+  return (
+    <main className="min-h-screen bg-[#020617] text-white">
+      <section className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6">
+        <div className="rounded-3xl border border-[#FBBF24]/30 bg-[#111827] p-8 text-center">
+          <p className="text-5xl">🎉</p>
+
+          <p className="mt-6 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+            YOU&apos;RE CONNECTED
+          </p>
+
+          <h1 className="mt-4 text-4xl font-black">
+            Your coach connection is active.
+          </h1>
+
+          <p className="mt-5 leading-7 text-slate-300">
+            Your coach can now view your shared AureonIQ career reports while
+            you are connected. Open the AureonIQ app and sign in with the same
+            email address you used for this invitation.
+          </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <a
+              href="/"
+              className="rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617]"
+            >
+              Back to AureonIQ
+            </a>
+
+            <a
+              href="/contact"
+              className="rounded-2xl border border-slate-700 px-6 py-4 font-black text-white"
+            >
+              Need Help?
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
 
   return (
     <main className="min-h-screen bg-[#020617] text-white">
@@ -138,16 +230,19 @@ export default function AcceptInvitePage() {
 
         <button
           onClick={acceptInvitation}
-          disabled={accepting || invitation?.status !== "pending"}
+          disabled={accepting}
           className="mt-8 rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617] disabled:opacity-60"
         >
           {accepting ? "Accepting..." : "Accept Invitation"}
         </button>
 
         {message ? (
-          <p className="mt-6 rounded-2xl border border-slate-800 bg-[#111827] p-5 text-slate-300">
-            {message}
-          </p>
+          <div className="mt-6 rounded-2xl border border-slate-800 bg-[#111827] p-5 text-slate-300">
+            <p>{message}</p>
+            <p className="mt-3 text-sm text-slate-400">
+              Make sure you use the same email address your coach invited.
+            </p>
+          </div>
         ) : null}
       </section>
     </main>

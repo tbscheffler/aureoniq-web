@@ -45,6 +45,13 @@ if (signupSuccess) {
   return;
 }
 
+const redirect = searchParams.get("redirect");
+
+if (redirect && redirect.startsWith("/")) {
+  window.location.href = redirect;
+  return;
+}
+
 const workspaces = await getUserWorkspaceAccess();
 
 if (workspaces.length === 1) {
