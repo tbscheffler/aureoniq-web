@@ -952,3 +952,16 @@ export async function completeOrganizationClientCoachingSession(
 
   return data;
 }
+
+
+export async function redeemInvitationCode(code: string) {
+  const { data, error } = await supabase.rpc("redeem_invitation_code", {
+    p_code: code,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

@@ -24,12 +24,13 @@ if (!user) {
   };
 }
 
-const { data: membership, error: membershipError } = await supabase
+const { data: memberships, error: membershipError } = await supabase
   .from("organization_members")
   .select("organization_id")
   .eq("user_id", user.id)
-  .eq("status", "active")
-  .maybeSingle();
+  .eq("status", "active");
+
+const membership = memberships?.[0];
 
   if (membershipError || !membership) {
     return {

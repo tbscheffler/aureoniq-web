@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { getUserWorkspaceAccess } from "@/services/workspaceAccessService";
+import { redeemInvitationCode } from "@/services/coachService";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -38,9 +39,17 @@ export default function LoginPage() {
 
 const searchParams = new URLSearchParams(window.location.search);
 const signupSuccess = searchParams.get("signup") === "success";
+const invitationCode = searchParams.get("invite");
 const selectedPlan = searchParams.get("plan") || "coach_starter";
 
 if (signupSuccess) {
+  if (invitationCode) {
+    await redeemInvitationCode(invitationCode);
+
+    window.location.href = "/coach";
+    return;
+  }
+
   window.location.href = `/start-trial?plan=${selectedPlan}`;
   return;
 }

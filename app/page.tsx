@@ -13,6 +13,12 @@ export default function Home() {
           <a href="#how-it-works" className="hover:text-[#FBBF24]">How It Works</a>
           <a href="#pricing" className="hover:text-[#FBBF24]">Pricing</a>
           <a href="/support" className="hover:text-[#FBBF24]">Support</a>
+          <a
+            href="/login"
+            className="text-sm font-medium text-white hover:text-[#FBBF24] transition-colors"
+          >
+            Login
+          </a>
         </div>
 
         <a
@@ -230,6 +236,9 @@ export default function Home() {
             <a href="/privacy" className="hover:text-[#FBBF24]">Privacy</a>
             <a href="/support" className="hover:text-[#FBBF24]">Support</a>
             <a href="/terms" className="hover:text-[#FBBF24]">Terms</a>
+            <a href="/login" className="hover:text-[#FBBF24]">
+              Login
+            </a>
           </div>
         </div>
       </footer>

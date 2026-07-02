@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useSearchParams } from "next/navigation";
 import { PLANS, PlanKey } from "@/config/plans";
+import { redeemInvitationCode } from "@/services/coachService";
 
 export default function SignupPage() {
   return (
@@ -16,6 +17,7 @@ export default function SignupPage() {
 
 function SignupContent() {
   const searchParams = useSearchParams();
+  const invitationCode = searchParams.get("invite");
   const selectedPlanKey = (searchParams.get("plan") || "coach_starter") as PlanKey;
   const selectedPlan = PLANS[selectedPlanKey] || PLANS.coach_starter;
   const [email, setEmail] = useState("");
@@ -48,6 +50,13 @@ function SignupContent() {
         return;
       }
 
+      if (invitationCode) {
+        window.location.href = `/login?signup=success&invite=${encodeURIComponent(
+          invitationCode
+        )}`;
+        return;
+      }
+
       window.location.href = `/login?signup=success&plan=${selectedPlan.key}`;
     } catch (err: any) {
       alert(err.message || "Signup failed");
@@ -64,7 +73,7 @@ function SignupContent() {
         </Link>
 
         <p className="mb-4 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-          START YOUR 14-DAY TRIAL
+          {invitationCode ? "FOUNDING COACH INVITATION" : "START YOUR 14-DAY TRIAL"}
         </p>
 
         <h1 className="text-4xl font-black">
@@ -72,9 +81,9 @@ function SignupContent() {
         </h1>
 
         <p className="mt-4 leading-7 text-slate-400">
-          Start free for {selectedPlan.trialDays} days with up to{" "}
-          {selectedPlan.activeClientLimit} active clients. {selectedPlan.displayName} is $
-          {selectedPlan.monthlyPrice}/month after trial.
+          {invitationCode
+            ? "You've been invited to join the AureonIQ Founding Coach Program. Your Coach Professional workspace will be activated automatically after you create your account."
+            : `Start free for ${selectedPlan.trialDays} days with up to ${selectedPlan.activeClientLimit} active clients. ${selectedPlan.displayName} is $${selectedPlan.monthlyPrice}/month after trial.`}
         </p>
 
         <div className="mt-10 space-y-4">
