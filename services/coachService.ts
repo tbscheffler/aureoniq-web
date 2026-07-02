@@ -256,12 +256,14 @@ export async function createOrganizationClientActionItem({
   title,
   description,
   dueDate,
-}: {
-  organizationClientId: string;
-  title: string;
-  description?: string;
-  dueDate?: string;
-}) {
+  coachingSessionId,
+  }: {
+    organizationClientId: string;
+    title: string;
+    description?: string;
+    dueDate?: string;
+    coachingSessionId?: string;
+  }) {
   const { data, error } = await supabase.rpc(
     "create_organization_client_action_item",
     {
@@ -269,6 +271,7 @@ export async function createOrganizationClientActionItem({
       p_title: title,
       p_description: description || null,
       p_due_date: dueDate || null,
+      p_coaching_session_id: coachingSessionId || null,
     }
   );
 
@@ -347,11 +350,12 @@ export async function getOrganizationClientCoachingSessions(
 export async function getOrganizationClientCoachingSession(
   sessionId: string
 ) {
-  const { data, error } = await supabase
-    .from("organization_client_coaching_sessions")
-    .select("*")
-    .eq("id", sessionId)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc(
+    "get_organization_client_coaching_session",
+    {
+      p_session_id: sessionId,
+    }
+  );
 
   if (error) {
     throw error;
@@ -367,15 +371,13 @@ export async function updateOrganizationClientCoachingSessionNotes({
   sessionId: string;
   sessionNotes: string;
 }) {
-  const { data, error } = await supabase
-    .from("organization_client_coaching_sessions")
-    .update({
-      session_notes: sessionNotes,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", sessionId)
-    .select("*")
-    .maybeSingle();
+  const { data, error } = await supabase.rpc(
+    "update_organization_client_coaching_session_notes",
+    {
+      p_session_id: sessionId,
+      p_session_notes: sessionNotes,
+    }
+  );
 
   if (error) {
     throw error;

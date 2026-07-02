@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import CoachShell from "@/components/coach/CoachShell";
 import {
+  createOrganizationClientActionItem,
+  getOrganizationClientActionItems,
   getOrganizationClientCoachingSession,
   updateOrganizationClientCoachingSessionNotes,
 } from "@/services/coachService";
@@ -21,6 +23,10 @@ export default function CoachingSessionWorkspacePage() {
   const [sessionNotes, setSessionNotes] = useState("");
     const [savingNotes, setSavingNotes] = useState(false);
     const [notesMessage, setNotesMessage] = useState("");
+    const [actionTitle, setActionTitle] = useState("");
+    const [savingAction, setSavingAction] = useState(false);
+    const [actionMessage, setActionMessage] = useState("");
+    const [sessionActionItems, setSessionActionItems] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadSession() {
@@ -28,6 +34,7 @@ export default function CoachingSessionWorkspacePage() {
         const data = await getOrganizationClientCoachingSession(sessionId);
         setSession(data);
         setSessionNotes(data?.session_notes || "");
+        await loadSessionActionItems();
       } catch (err: any) {
         setError(err.message || "Unable to load session.");
       } finally {
@@ -56,6 +63,42 @@ export default function CoachingSessionWorkspacePage() {
         setSavingNotes(false);
     }
     }
+
+    async function loadSessionActionItems() {
+        const items = await getOrganizationClientActionItems(clientId);
+
+        const filteredItems = (items || []).filter(
+            (item: any) => item.coaching_session_id === sessionId
+        );
+
+        setSessionActionItems(filteredItems);
+        }
+
+    async function handleAddSessionActionItem() {
+  try {
+    setSavingAction(true);
+    setActionMessage("");
+
+    if (!actionTitle.trim()) {
+      setActionMessage("Please enter an action item.");
+      return;
+    }
+
+    await createOrganizationClientActionItem({
+      organizationClientId: clientId,
+      title: actionTitle.trim(),
+      coachingSessionId: sessionId,
+    });
+
+    setActionTitle("");
+    await loadSessionActionItems();
+    setActionMessage("Action item added.");
+  } catch (err: any) {
+    setActionMessage(err.message || "Unable to add action item.");
+  } finally {
+    setSavingAction(false);
+  }
+}
 
 
   return (
@@ -129,6 +172,54 @@ export default function CoachingSessionWorkspacePage() {
 
             {notesMessage ? (
             <p className="mt-3 text-sm text-slate-400">{notesMessage}</p>
+            ) : null}
+            </div>
+            <div className="mt-6 rounded-2xl border border-slate-800 bg-[#020617] p-5">
+            <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+                ACTION ITEMS
+            </p>
+
+            <h2 className="mt-3 text-xl font-black">Session action item</h2>
+
+            {sessionActionItems.length > 0 ? (
+                <div className="mt-4 space-y-3">
+                    {sessionActionItems.map((item) => (
+                    <div
+                        key={item.id}
+                        className="rounded-2xl border border-slate-800 bg-[#111827] p-4"
+                    >
+                        <p className="font-bold text-white">{item.title}</p>
+
+                        <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">
+                        {item.status || "open"}
+                        </p>
+                    </div>
+                    ))}
+                </div>
+                ) : (
+                <p className="mt-4 text-sm text-slate-500">
+                    No action items for this session yet.
+                </p>
+                )}
+
+            <input
+                value={actionTitle}
+                onChange={(event) => setActionTitle(event.target.value)}
+                className="mt-4 w-full rounded-2xl border border-slate-800 bg-[#111827] p-4 text-sm text-white outline-none focus:border-[#FBBF24]"
+                placeholder="Example: Update resume summary before next session"
+            />
+
+            <button
+                type="button"
+                onClick={handleAddSessionActionItem}
+                disabled={savingAction}
+                className="mt-4 rounded-xl bg-[#FBBF24] px-5 py-3 text-sm font-black text-[#020617] disabled:opacity-60"
+            >
+                {savingAction ? "Adding..." : "Add Action Item"}
+            </button>
+
+            {actionMessage ? (
+                <p className="mt-3 text-sm text-slate-400">{actionMessage}</p>
             ) : null}
             </div>
           </>
