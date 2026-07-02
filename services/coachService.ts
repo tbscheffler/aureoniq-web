@@ -965,3 +965,25 @@ export async function redeemInvitationCode(code: string) {
 
   return data;
 }
+
+export async function createFounderInvitationCode({
+  coachName,
+  coachEmail,
+}: {
+  coachName?: string;
+  coachEmail?: string;
+}) {
+  const { data, error } = await supabase.rpc(
+    "create_founder_invitation_code",
+    {
+      p_coach_name: coachName || null,
+      p_coach_email: coachEmail || null,
+    }
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}

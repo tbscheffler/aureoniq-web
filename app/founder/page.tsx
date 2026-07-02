@@ -170,6 +170,12 @@ supabase.from("analytics_events").select("event_name"),
         <a href="/" className="text-sm font-bold text-[#FBBF24]">
           ← Back to AureonIQ
         </a>
+        <a
+          href="/founder/beta"
+          className="ml-6 text-sm font-bold text-[#FBBF24]"
+        >
+          Beta Program →
+        </a>
 
         <div className="mt-10">
           <p className="mb-4 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
@@ -194,6 +200,44 @@ supabase.from("analytics_events").select("event_name"),
           <MetricCard title="Discovery Reports" value={metrics.discoveryReports} />
           <MetricCard title="AIQ Reports" value={metrics.aiqReports} />
         </div>
+
+        <section className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
+          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+            WEBSITE ANALYTICS
+          </p>
+
+          <h2 className="mt-4 text-3xl font-black text-white">
+            Traffic Overview
+          </h2>
+
+          <p className="mt-3 text-slate-400">
+            Live website performance from Google Analytics.
+          </p>
+
+          <div className="mt-8 grid gap-6 md:grid-cols-4">
+            <MetricCard title="Visitors Today" value="--" />
+            <MetricCard title="Last 7 Days" value="--" />
+            <MetricCard title="Last 30 Days" value="--" />
+            <MetricCard title="Returning Visitors" value="--" />
+          </div>
+        </section>
+
+        <section className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
+          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+            TRAFFIC SOURCES
+          </p>
+
+          <h2 className="mt-4 text-3xl font-black text-white">
+            Where visitors are coming from
+          </h2>
+
+          <div className="mt-8 grid gap-6 md:grid-cols-4">
+            <MetricCard title="LinkedIn" value="--" />
+            <MetricCard title="Google" value="--" />
+            <MetricCard title="Direct" value="--" />
+            <MetricCard title="Other" value="--" />
+          </div>
+        </section>
 
         <div className="mt-8 rounded-3xl border border-slate-800 bg-[#111827] p-8">
           <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
@@ -252,7 +296,7 @@ function MetricCard({
   suffix = "",
 }: {
   title: string;
-  value: number;
+  value: number | string;
   suffix?: string;
 }) {
   return (
