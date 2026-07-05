@@ -33,7 +33,9 @@ type CoachDashboardHeaderProps = {
             <p className="text-xs font-black uppercase tracking-[0.2em] text-[#FBBF24]">
               Current Plan
             </p>
-            <p className="mt-2 text-xl font-black text-white">{planName}</p>
+            <p className="mt-2 text-xl font-black text-white">
+              {formatPlanName(planName)}
+            </p>
           </div>
         </div>
       </div>
@@ -47,3 +49,16 @@ type CoachDashboardHeaderProps = {
     if (hour < 18) return "Good afternoon";
     return "Good evening";
   }
+
+  function formatPlanName(planName: string) {
+  if (!planName) {
+    return "Coach Beta";
+  }
+
+  return planName
+    .split("_")
+    .map(
+      (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
+    .join(" ");
+}

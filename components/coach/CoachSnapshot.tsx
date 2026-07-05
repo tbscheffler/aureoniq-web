@@ -42,9 +42,9 @@ export default function CoachSnapshot({
         />
 
         <SnapshotCard
-          label="Career Health"
-          value="—"
-          subtext="Coming Soon"
+          label="Demo Clients"
+          value={demoClients}
+          subtext="Ready to Explore"
         />
 
       </div>

@@ -110,3 +110,25 @@ begin
   return v_client_id;
 end;
 $$;
+
+
+
+
+
+
+
+
+-- Demo Client Table Create --
+
+create table if not exists public.demo_clients (
+  id uuid primary key default gen_random_uuid(),
+  display_name text not null,
+  sample_user_id uuid not null,
+  resume_profile_id uuid,
+  career_report_id uuid,
+  aiq_report_id uuid,
+  enabled boolean not null default true,
+  sort_order integer not null default 100,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);

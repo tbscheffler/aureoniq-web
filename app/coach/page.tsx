@@ -110,12 +110,33 @@ export default function CoachPage() {
     }
   }
 
-  useEffect(() => {
-    loadCoachDashboard();
-  }, []);
+useEffect(() => {
+  loadCoachDashboard();
+}, []);
 
+if (loading) {
+  return (
+    <CoachShell>
+      <section>
+        <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
+          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
+            COACH WORKSPACE
+          </p>
 
-  const seatUsage = dashboardData?.seatUsage;
+          <h1 className="mt-4 text-4xl font-black text-white md:text-5xl">
+            Loading coach dashboard...
+          </h1>
+
+          <p className="mt-4 text-lg text-slate-400">
+            Preparing your workspace.
+          </p>
+        </div>
+      </section>
+    </CoachShell>
+  );
+}
+
+const seatUsage = dashboardData?.seatUsage;
 
   const clientLimit = Number(seatUsage?.seat_limit ?? plan?.managed_client_limit ?? 4);
   const activeClients = Number(seatUsage?.billable_clients ?? clients.length);
