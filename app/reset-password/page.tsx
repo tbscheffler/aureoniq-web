@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import Link from "next/link";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -122,7 +123,24 @@ export default function ResetPasswordPage() {
 
           {errorMessage && <p className="text-sm text-red-400">{errorMessage}</p>}
 
-          {message && <p className="text-sm text-green-400">{message}</p>}
+          {message && (
+            <div className="space-y-4">
+                <p className="text-sm text-green-400">
+                Your password has been updated successfully.
+                </p>
+
+                <Link
+                href="/login"
+                className="block w-full rounded-lg bg-yellow-400 px-4 py-3 text-center font-semibold text-black hover:bg-yellow-300"
+                >
+                Go to Website Login
+                </Link>
+
+                <p className="text-sm text-white/60 text-center">
+                Or return to the AureonIQ mobile app and sign in with your new password.
+                </p>
+            </div>
+            )}
 
           <button
             type="submit"
