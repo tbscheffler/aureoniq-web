@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { getUserWorkspaceAccess } from "@/services/workspaceAccessService";
 import { redeemInvitationCode } from "@/services/coachService";
 
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

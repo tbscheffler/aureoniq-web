@@ -40,9 +40,8 @@ export default function Home() {
           </h1>
 
           <p className="mt-6 max-w-xl text-xl leading-8 text-slate-300">
-            AureonIQ turns career experience into actionable Career Intelligence,
-            helping professionals discover opportunities and helping coaches guide
-            better career decisions.
+            AureonIQ turns real experience into clear career direction, helping you
+            see value a resume alone may not reveal.
           </p>
 
           <div className="mt-9 flex flex-col gap-4 sm:flex-row">
@@ -63,13 +62,63 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="relative mx-auto max-w-sm">
-          <div className="absolute inset-0 rounded-[3rem] bg-[#FBBF24]/20 blur-3xl" />
-          <img
-            src="/screenshots/professional-home.png"
-            alt="AureonIQ mobile app home screen"
-            className="relative rounded-[2.5rem] border border-slate-700 shadow-2xl"
-          />
+        <div className="rounded-[2rem] border border-slate-800 bg-[#07111f] p-5 shadow-2xl">
+          <div className="rounded-[1.5rem] border border-slate-800 bg-[#020617] p-5">
+            <p className="text-xs font-black tracking-[0.25em] text-[#FBBF24]">
+              CAREER PREVIEW
+            </p>
+
+            <div className="mt-4 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-black">Sarah Mitchell</h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Elementary Teacher · Photography Business
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-[#FBBF24] px-4 py-3 text-center text-[#020617]">
+                <p className="text-xs font-black">SCORE</p>
+                <p className="text-2xl font-black">84</p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-slate-800 bg-[#111827] p-5">
+              <p className="text-xs font-black tracking-[0.25em] text-slate-400">
+                BEST CAREER MATCH
+              </p>
+              <h3 className="mt-2 text-xl font-black text-white">
+                Customer Success Manager
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-slate-300">
+                Sarah&apos;s teaching background and photography business reveal
+                strong communication, client service, scheduling, and operations
+                experience.
+              </p>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-slate-800 bg-[#111827] p-5">
+              <p className="text-xs font-black tracking-[0.25em] text-slate-400">
+                HIDDEN OPPORTUNITY
+              </p>
+              <h3 className="mt-2 text-xl font-black text-white">
+                Client Experience Lead
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-slate-300">
+                AureonIQ surfaces career options that may not appear from job titles
+                alone.
+              </p>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-[#FBBF24]/30 bg-[#FBBF24]/10 p-5">
+              <p className="text-xs font-black tracking-[0.25em] text-[#FBBF24]">
+                CAREER TRANSLATION
+              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-200">
+                Teaching + entrepreneurship revealed stronger client, operations, and
+                communication signals than her resume alone showed.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 

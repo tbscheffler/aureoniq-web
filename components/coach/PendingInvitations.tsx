@@ -26,9 +26,12 @@ export default function PendingInvitations({
               key={invite.id}
               className="rounded-2xl border border-slate-700 bg-[#020617] p-5"
             >
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <p className="font-black text-white">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
+                <div className="min-w-0 flex-1">
+                  <p
+                    className="truncate font-black text-white"
+                    title={invite.client_email}
+                  >
                     {invite.client_email}
                   </p>
 
@@ -46,7 +49,7 @@ export default function PendingInvitations({
 
                 <button
                   onClick={() => handleRevokeInvitation(invite.id)}
-                  className="rounded-2xl border border-red-400/40 bg-red-400/10 px-4 py-2 text-sm font-black text-red-300 hover:border-red-300"
+                  className="shrink-0 self-start rounded-2xl border border-red-400/40 bg-red-400/10 px-4 py-2 text-sm font-black text-red-300 hover:border-red-300"
                 >
                   Revoke
                 </button>

@@ -1,12 +1,14 @@
 type CoachDashboardHeaderProps = {
-    organizationName: string;
-    planName: string;
-  };
+  organizationName: string;
+  planName: string;
+  firstName?: string;
+};
   
-  export default function CoachDashboardHeader({
-    organizationName,
-    planName,
-  }: CoachDashboardHeaderProps) {
+export default function CoachDashboardHeader({
+  organizationName,
+  planName,
+  firstName,
+}: CoachDashboardHeaderProps) {
     return (
       <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
         <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
@@ -16,8 +18,8 @@ type CoachDashboardHeaderProps = {
         <div className="mt-4 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
           <h1 className="text-4xl font-black md:text-5xl">
-            {getGreeting()}
-            </h1>
+            {getGreeting(firstName)}
+          </h1>
 
             <p className="mt-3 text-2xl font-black text-[#FBBF24]">
             {organizationName}
@@ -42,12 +44,20 @@ type CoachDashboardHeaderProps = {
     );
   }
   
-  function getGreeting() {
+  function getGreeting(firstName?: string) {
     const hour = new Date().getHours();
-  
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
+
+    let greeting = "Good evening";
+
+    if (hour < 12) {
+      greeting = "Good morning";
+    } else if (hour < 18) {
+      greeting = "Good afternoon";
+    }
+
+    return firstName
+      ? `${greeting}, ${firstName}.`
+      : greeting;
   }
 
   function formatPlanName(planName: string) {

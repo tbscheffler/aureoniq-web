@@ -20,6 +20,7 @@ import TodaysAgenda from "@/components/coach/TodaysAgenda";
 import { getCoachEntitlement } from "@/services/billing/entitlementService";
 import CoachCommandCenter from "@/components/coach/CoachCommandCenter";
 import CoachSnapshot from "@/components/coach/CoachSnapshot";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function CoachPage() {
   const [loading, setLoading] = useState(true);
@@ -32,6 +33,7 @@ export default function CoachPage() {
   const [agendaStats, setAgendaStats] = useState<any>(null);
   const [todaysMeetings, setTodaysMeetings] = useState<any[]>([]);
   const [dashboardData, setDashboardData] = useState<any>(null);
+  const [coachFirstName, setCoachFirstName] = useState("");
 
   async function loadCoachDashboard() {
     try {
@@ -67,6 +69,21 @@ export default function CoachPage() {
       }
 
       const membership = await getCurrentOrganization();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user?.id) {
+        const { data: coachProfile } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const displayName = coachProfile?.display_name || user.email || "";
+        setCoachFirstName(displayName.split(" ")[0]);
+      }
 
       const organizationId = membership.organization_id;
       await ensureSampleClientForOrganization(organizationId);
@@ -147,9 +164,10 @@ const seatUsage = dashboardData?.seatUsage;
     <section>
 
     <CoachDashboardHeader
-        organizationName={organization?.name || "Coach Workspace"}
-        planName={plan?.plan_type || "Free Beta"}
-      />
+      organizationName={organization?.name || "Coach Workspace"}
+      planName={plan?.plan_type || "Free Beta"}
+      firstName={coachFirstName}
+    />
 
         <CoachSnapshot
           activeClients={stats?.activeClients ?? activeClients}
