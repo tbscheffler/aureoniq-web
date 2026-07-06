@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function ResetPasswordPage() {
@@ -9,6 +9,33 @@ export default function ResetPasswordPage() {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+
+  const accessToken = hashParams.get("access_token");
+  const refreshToken = hashParams.get("refresh_token");
+
+  async function setRecoverySession() {
+    if (!accessToken || !refreshToken) {
+      setErrorMessage(
+        "This reset link is missing required recovery information. Please request a new password reset email."
+      );
+      return;
+    }
+
+    const { error } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+    }
+  }
+
+  setRecoverySession();
+}, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
