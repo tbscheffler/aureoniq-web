@@ -81,8 +81,12 @@ export default function CoachPage() {
           .eq("user_id", user.id)
           .maybeSingle();
 
-        const displayName = coachProfile?.display_name || user.email || "";
-        setCoachFirstName(displayName.split(" ")[0]);
+        const displayName =
+        coachProfile?.display_name ||
+        user.user_metadata?.display_name ||
+        "";
+
+      setCoachFirstName(displayName.trim().split(" ")[0] || "");
       }
 
       const organizationId = membership.organization_id;

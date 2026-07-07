@@ -32,6 +32,10 @@ export default function FounderBetaPage() {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [coachName, setCoachName] = useState("");
     const [coachEmail, setCoachEmail] = useState("");
+    const [planType, setPlanType] = useState("coach_professional");
+    const [trialDays, setTrialDays] = useState(60);
+    const [managedClientLimit, setManagedClientLimit] = useState(25);
+    const [maxRedemptions, setMaxRedemptions] = useState(1);
     const [creatingInvite, setCreatingInvite] = useState(false);
     const [loading, setLoading] = useState(true);
     const [authorized, setAuthorized] = useState(false);
@@ -80,10 +84,18 @@ export default function FounderBetaPage() {
     await createFounderInvitationCode({
       coachName,
       coachEmail,
+      planType,
+      betaExpiresAfterDays: trialDays,
+      managedClientLimit,
+      maxRedemptions,
     });
 
     setCoachName("");
     setCoachEmail("");
+    setPlanType("coach_professional");
+    setTrialDays(60);
+    setManagedClientLimit(25);
+    setMaxRedemptions(1);
     setShowCreateForm(false);
 
     const { data } = await supabase
@@ -196,6 +208,8 @@ if (loading || !authorized) {
                   <th className="px-5 py-4 font-bold">Code</th>
                   <th className="px-5 py-4 font-bold">Purpose</th>
                   <th className="px-5 py-4 font-bold">Plan</th>
+                  <th className="px-5 py-4 font-bold">Trial</th>
+                  <th className="px-5 py-4 font-bold">Client Limit</th>
                   <th className="px-5 py-4 font-bold">Redemptions</th>
                   <th className="px-5 py-4 font-bold">Status</th>
                   <th className="px-5 py-4 font-bold">Actions</th>
@@ -205,7 +219,7 @@ if (loading || !authorized) {
               <tbody>
                 {invites.length === 0 ? (
                     <tr className="border-t border-slate-800">
-                    <td className="px-5 py-5 text-slate-400" colSpan={7}>
+                    <td className="px-5 py-5 text-slate-400" colSpan={9}>
                         No invitation codes yet.
                     </td>
                     </tr>
@@ -225,6 +239,14 @@ if (loading || !authorized) {
 
                         <td className="px-5 py-5 text-slate-300">
                         {invite.plan_type}
+                        </td>
+
+                        <td className="px-5 py-5 text-slate-300">
+                        {invite.beta_expires_after_days || 90} days
+                        </td>
+
+                        <td className="px-5 py-5 text-slate-300">
+                        {invite.managed_client_limit || 25}
                         </td>
 
                         <td className="px-5 py-5 text-slate-300">
@@ -280,7 +302,61 @@ if (loading || !authorized) {
             placeholder="Coach email optional"
             />
 
-            <div className="mt-6 flex gap-3">
+            <label className="space-y-2">
+              <span className="block text-sm font-bold text-slate-400">Plan</span>
+              <select
+                value={planType}
+                onChange={(event) => setPlanType(event.target.value)}
+                className="w-full rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+              >
+                <option value="coach_professional">Coach Professional</option>
+              </select>
+            </label>
+
+            <label className="space-y-2">
+              <span className="block text-sm font-bold text-slate-400">Trial Length</span>
+              <select
+                value={trialDays}
+                onChange={(event) => setTrialDays(Number(event.target.value))}
+                className="w-full rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+              >
+                <option value={14}>14 days</option>
+                <option value={30}>30 days</option>
+                <option value={60}>60 days</option>
+                <option value={90}>90 days</option>
+                <option value={180}>180 days</option>
+              </select>
+            </label>
+
+            <label className="space-y-2">
+              <span className="block text-sm font-bold text-slate-400">Managed Client Limit</span>
+              <input
+                type="number"
+                min={1}
+                value={managedClientLimit}
+                onChange={(event) => setManagedClientLimit(Number(event.target.value))}
+                className="w-full rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+                placeholder="25"
+              />
+            </label>
+
+            <label className="space-y-2">
+              <span className="block text-sm font-bold text-slate-400">Max Redemptions</span>
+              <input
+                type="number"
+                min={1}
+                value={maxRedemptions}
+                onChange={(event) => setMaxRedemptions(Number(event.target.value))}
+                className="w-full rounded-2xl border border-slate-700 bg-[#020617] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+                placeholder="1"
+              />
+            </label>
+
+            <div className="rounded-2xl border border-[#FBBF24]/20 bg-[#FBBF24]/10 p-4 text-sm text-slate-300 md:col-span-2">
+              This invite will create a <span className="font-bold text-white">{trialDays}-day trial</span> with <span className="font-bold text-white">{managedClientLimit}</span> managed client seats and <span className="font-bold text-white">{maxRedemptions}</span> allowed redemption{maxRedemptions === 1 ? "" : "s"}.
+            </div>
+
+            <div className="mt-2 flex gap-3 md:col-span-2">
             <button
             onClick={handleCreateInvitation}
             disabled={creatingInvite}

@@ -35,15 +35,23 @@ export default function CoachReportViewer({
                 report={latestReport.report_json || latestReport}
                 />
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button className="rounded-2xl bg-[#FBBF24] px-5 py-3 font-black text-[#020617]">
-              View Full Report
-            </button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            disabled
+            className="cursor-not-allowed rounded-2xl border border-slate-700 px-5 py-3 font-black text-slate-500"
+          >
+            Full Report Coming Soon
+          </button>
 
-            <button className="rounded-2xl border border-slate-700 px-5 py-3 font-black text-white">
-              Compare Versions
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled
+            className="cursor-not-allowed rounded-2xl border border-slate-700 px-5 py-3 font-black text-slate-500"
+          >
+            Compare Versions Coming Soon
+          </button>
+        </div>
         </>
       )}
     </DashboardCard>

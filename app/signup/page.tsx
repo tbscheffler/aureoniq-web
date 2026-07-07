@@ -23,23 +23,36 @@ function SignupContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSignup() {
     try {
       setLoading(true);
 
-      if (!email || !password || !businessName) {
-        alert("Please fill out your email, password, and coaching business name.");
-        return;
-      }
+      if (
+          !firstName.trim() ||
+          !lastName.trim() ||
+          !email ||
+          !password ||
+          !businessName.trim()
+        ) {
+          alert(
+            "Please enter your first name, last name, email, password, and coaching business name."
+          );
+          return;
+        }
 
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            business_name: businessName,
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            display_name: `${firstName.trim()} ${lastName.trim()}`,
+            business_name: businessName.trim(),
             signup_type: "coach_trial",
           },
         },
@@ -85,6 +98,22 @@ function SignupContent() {
             ? "You've been invited to join the AureonIQ Founding Coach Program. Your Coach Professional workspace will be activated automatically after you create your account."
             : `Start free for ${selectedPlan.trialDays} days with up to ${selectedPlan.activeClientLimit} active clients. ${selectedPlan.displayName} is $${selectedPlan.monthlyPrice}/month after trial.`}
         </p>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <input
+            className="w-full rounded-2xl border border-slate-700 bg-[#111827] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+            placeholder="First name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+
+          <input
+            className="w-full rounded-2xl border border-slate-700 bg-[#111827] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
+            placeholder="Last name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+        </div>
 
         <div className="mt-10 space-y-4">
           <input

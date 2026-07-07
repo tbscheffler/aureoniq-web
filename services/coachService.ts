@@ -969,15 +969,27 @@ export async function redeemInvitationCode(code: string) {
 export async function createFounderInvitationCode({
   coachName,
   coachEmail,
+  planType = "coach_professional",
+  managedClientLimit = 25,
+  maxRedemptions = 1,
+  betaExpiresAfterDays = 60,
 }: {
   coachName?: string;
   coachEmail?: string;
+  planType?: string;
+  managedClientLimit?: number;
+  maxRedemptions?: number;
+  betaExpiresAfterDays?: number;
 }) {
   const { data, error } = await supabase.rpc(
     "create_founder_invitation_code",
     {
       p_coach_name: coachName || null,
       p_coach_email: coachEmail || null,
+      p_plan_type: planType,
+      p_managed_client_limit: managedClientLimit,
+      p_max_redemptions: maxRedemptions,
+      p_beta_expires_after_days: betaExpiresAfterDays,
     }
   );
 
