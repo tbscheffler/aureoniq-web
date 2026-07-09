@@ -6,22 +6,27 @@ type RecentActivityProps = {
 
 export default function RecentActivity({ activity }: RecentActivityProps) {
   return (
-    <DashboardCard eyebrow="RECENT ACTIVITY" title="Workspace Activity" className="h-full">
-
+    <DashboardCard eyebrow="RECENT ACTIVITY" title="Workspace activity" className="h-full">
       {activity.length === 0 ? (
-        <p className="mt-6 text-slate-400">No recent activity yet.</p>
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <p className="font-black text-slate-950">No recent activity yet.</p>
+          <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+            Activity will appear here as clients accept invitations, reports are
+            shared, sessions are logged, and reflections are added.
+          </p>
+        </div>
       ) : (
         <div className="mt-6 max-h-[420px] space-y-4 overflow-y-auto pr-2">
           {activity.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl border border-slate-700 bg-[#020617] p-5"
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
             >
-              <p className="font-bold text-white">
+              <p className="font-bold text-slate-950">
                 {formatActivityMessage(item)}
               </p>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm font-semibold text-slate-500">
                 {formatActivityDate(item.created_at)}
               </p>
             </div>

@@ -10,12 +10,12 @@ export default function SearchBar({
   placeholder = "Search...",
 }: SearchBarProps) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-[#111827] p-3">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 focus-within:border-[#4C1D95] focus-within:ring-4 focus-within:ring-violet-100">
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-transparent text-white outline-none placeholder:text-slate-500"
+        className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400"
       />
     </div>
   );

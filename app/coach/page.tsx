@@ -5,9 +5,7 @@ import {
   getCurrentOrganization,
   getOrganizationPlan,
   getOrganizationClients,
-  getCoachDashboardStats,
   getCoachRecentActivity,
-  getCoachAgendaStats,
   getTodaysCoachMeetings,
   ensureSampleClientForOrganization,
   getCoachDashboard,
@@ -27,7 +25,6 @@ export default function CoachPage() {
   const [organization, setOrganization] = useState<any>(null);
   const [plan, setPlan] = useState<any>(null);
   const [clients, setClients] = useState<any[]>([]);
-  const [clientEmail, setClientEmail] = useState("");
   const [stats, setStats] = useState<any>(null);
   const [activity, setActivity] = useState<any[]>([]);
   const [agendaStats, setAgendaStats] = useState<any>(null);
@@ -82,11 +79,9 @@ export default function CoachPage() {
           .maybeSingle();
 
         const displayName =
-        coachProfile?.display_name ||
-        user.user_metadata?.display_name ||
-        "";
+          coachProfile?.display_name || user.user_metadata?.display_name || "";
 
-      setCoachFirstName(displayName.trim().split(" ")[0] || "");
+        setCoachFirstName(displayName.trim().split(" ")[0] || "");
       }
 
       const organizationId = membership.organization_id;
@@ -95,23 +90,19 @@ export default function CoachPage() {
         ? membership.organizations[0]
         : membership.organizations;
 
-      const [
-        planData,
-        clientData,
-        dashboardData,
-        activityData,
-        todaysMeetingsData,
-      ] = await Promise.all([
-        getOrganizationPlan(organizationId),
-        getOrganizationClients(organizationId),
-        getCoachDashboard(organizationId),
-        getCoachRecentActivity(organizationId),
-        getTodaysCoachMeetings(organizationId),
-      ]);
+      const [planData, clientData, dashboardData, activityData, todaysMeetingsData] =
+        await Promise.all([
+          getOrganizationPlan(organizationId),
+          getOrganizationClients(organizationId),
+          getCoachDashboard(organizationId),
+          getCoachRecentActivity(organizationId),
+          getTodaysCoachMeetings(organizationId),
+        ]);
 
       setOrganization(orgData);
       setPlan(planData);
-            const clientsWithHealth = await Promise.all(
+
+      const clientsWithHealth = await Promise.all(
         (clientData || []).map(async (client) => ({
           ...client,
           health: await getClientHealth(client.id),
@@ -131,47 +122,48 @@ export default function CoachPage() {
     }
   }
 
-useEffect(() => {
-  loadCoachDashboard();
-}, []);
+  useEffect(() => {
+    loadCoachDashboard();
+  }, []);
 
-if (loading) {
-  return (
-    <CoachShell>
-      <section>
-        <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            COACH WORKSPACE
-          </p>
+  if (loading) {
+    return (
+      <CoachShell>
+        <section className="rounded-[2rem] bg-[#F8FAFC] p-4 text-[#111827] md:p-6">
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+            <p className="text-sm font-black uppercase tracking-[0.24em] text-[#B8872A]">
+              COACH WORKSPACE
+            </p>
 
-          <h1 className="mt-4 text-4xl font-black text-white md:text-5xl">
-            Loading coach dashboard...
-          </h1>
+            <h1 className="mt-4 text-4xl font-black text-slate-950 md:text-5xl">
+              Loading coach dashboard...
+            </h1>
 
-          <p className="mt-4 text-lg text-slate-400">
-            Preparing your workspace.
-          </p>
-        </div>
-      </section>
-    </CoachShell>
+            <p className="mt-4 text-lg text-slate-500">
+              Preparing your workspace.
+            </p>
+          </div>
+        </section>
+      </CoachShell>
+    );
+  }
+
+  const seatUsage = dashboardData?.seatUsage;
+
+  const clientLimit = Number(
+    seatUsage?.seat_limit ?? plan?.managed_client_limit ?? 4
   );
-}
-
-const seatUsage = dashboardData?.seatUsage;
-
-  const clientLimit = Number(seatUsage?.seat_limit ?? plan?.managed_client_limit ?? 4);
   const activeClients = Number(seatUsage?.billable_clients ?? clients.length);
   const demoClients = Number(seatUsage?.demo_clients ?? 0);
 
   return (
     <CoachShell>
-    <section>
-
-    <CoachDashboardHeader
-      organizationName={organization?.name || "Coach Workspace"}
-      planName={plan?.plan_type || "Free Beta"}
-      firstName={coachFirstName}
-    />
+      <section className="rounded-[2rem] bg-[#F8FAFC] p-4 text-[#111827] md:p-6">
+        <CoachDashboardHeader
+          organizationName={organization?.name || "Coach Workspace"}
+          planName={plan?.plan_type || "Free Beta"}
+          firstName={coachFirstName}
+        />
 
         <CoachSnapshot
           activeClients={stats?.activeClients ?? activeClients}
@@ -188,16 +180,11 @@ const seatUsage = dashboardData?.seatUsage;
           />
         </div>
 
-
-
-        <div className="mt-8 grid items-stretch gap-6 lg:grid-cols-[1fr_1fr]">
+        <div className="mt-7 grid items-stretch gap-7 lg:grid-cols-[1fr_1fr]">
           <CoachCommandCenter clients={clients} />
-
           <RecentActivity activity={activity} />
         </div>
-        </section>
-        </CoachShell>
+      </section>
+    </CoachShell>
   );
 }
-
-

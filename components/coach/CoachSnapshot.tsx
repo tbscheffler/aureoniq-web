@@ -18,35 +18,33 @@ export default function CoachSnapshot({
   return (
     <DashboardCard
       eyebrow="TODAY'S SNAPSHOT"
-      title="Executive Overview"
-      className="mt-8"
+      title="At a glance"
+      className="mt-7"
     >
       <div className="mt-6 grid gap-4 md:grid-cols-4">
-
         <SnapshotCard
           label="Clients"
           value={`${activeClients}/${clientLimit}`}
-          subtext={`${demoClients} Demo`}
+          subtext={`${demoClients} demo workspace${demoClients === 1 ? "" : "s"}`}
         />
 
         <SnapshotCard
-          label="Meetings"
+          label="Meetings Today"
           value={meetingsToday}
-          subtext="Today"
+          subtext="Scheduled coaching conversations"
         />
 
         <SnapshotCard
           label="Needs Attention"
           value={overdueActions}
-          subtext="Open Items"
+          subtext="Open growth items"
         />
 
         <SnapshotCard
-          label="Demo Clients"
+          label="Demo Workspaces"
           value={demoClients}
-          subtext="Ready to Explore"
+          subtext="Practice before inviting clients"
         />
-
       </div>
     </DashboardCard>
   );
@@ -62,20 +60,14 @@ function SnapshotCard({
   subtext: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-[#020617] p-5">
-
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">
         {label}
       </p>
 
-      <p className="mt-3 text-3xl font-black text-[#FBBF24]">
-        {value}
-      </p>
+      <p className="mt-3 text-3xl font-black text-[#B8872A]">{value}</p>
 
-      <p className="mt-1 text-sm text-slate-400">
-        {subtext}
-      </p>
-
+      <p className="mt-1 text-sm font-semibold text-slate-500">{subtext}</p>
     </div>
   );
 }

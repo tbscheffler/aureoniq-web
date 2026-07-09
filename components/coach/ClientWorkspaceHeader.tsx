@@ -14,144 +14,182 @@ type Props = {
     score: number;
     status: string;
   } | null;
+  resumeProfile?: any;
+  careerReport?: any;
+  aiqReport?: any;
 };
 
 export default function ClientWorkspaceHeader({
   client,
   hasDiscoveryReport = false,
   hasAIQReport = false,
-  openActionItems = 0,
-  nextMeeting = null,
   clientHealth = null,
+  resumeProfile = null,
+  careerReport = null,
+  aiqReport = null,
 }: Props) {
-const name =
-  client?.client_display_name ||
-  client?.client_profile?.display_name ||
-  client?.client_email ||
-  "Client";
+  const name =
+    client?.client_display_name ||
+    client?.client_profile?.display_name ||
+    client?.client_email ||
+    "Client";
 
-const isSampleClient = Boolean(client?.is_sample);
-const [endingRelationship, setEndingRelationship] = useState(false);
+  const initials = getInitials(name);
+  const isSampleClient = Boolean(client?.is_sample);
+  const [endingRelationship, setEndingRelationship] = useState(false);
 
-async function handleEndRelationship() {
-  const confirmed = window.confirm(
-    "End this coaching relationship? This will remove the client from your active roster and end their sponsored access. Their AureonIQ account and data will not be deleted."
-  );
+  const currentTitle =
+    resumeProfile?.current_title ||
+    resumeProfile?.currentTitle ||
+    careerReport?.currentRole ||
+    "Career Explorer";
 
-  if (!confirmed) return;
+  const location =
+    resumeProfile?.preferred_location ||
+    resumeProfile?.location ||
+    careerReport?.regionalContext?.region ||
+    careerReport?.regionalContext?.matchedRegion ||
+    "Location not set";
 
-  try {
-    setEndingRelationship(true);
+  const targetSalary =
+    careerReport?.salaryGoal ||
+    careerReport?.marketValue ||
+    "Target not set";
 
-    await endOrganizationClientRelationship(client.id);
+  const careerStory =
+    careerReport?.summary ||
+    aiqReport?.aiqSummary ||
+    "This career profile is still developing. As the client completes reports and shares more career evidence, AureonIQ will build a clearer picture of their strengths, opportunities, and next steps.";
 
-    alert("Coaching relationship ended.");
+  const aiqScore =
+    aiqReport?.careerValue?.score ||
+    aiqReport?.opportunityIndex?.score ||
+    aiqReport?.growthPotential?.score ||
+    clientHealth?.score ||
+    "--";
 
-    window.location.href = "/coach";
-  } catch (error: any) {
-    alert(error.message || "Unable to end coaching relationship.");
-  } finally {
-    setEndingRelationship(false);
+  async function handleEndRelationship() {
+    const confirmed = window.confirm(
+      "End this coaching relationship? This will remove the client from your active roster and end their sponsored access. Their AureonIQ account and data will not be deleted."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setEndingRelationship(true);
+      await endOrganizationClientRelationship(client.id);
+      alert("Coaching relationship ended.");
+      window.location.href = "/coach";
+    } catch (error: any) {
+      alert(error.message || "Unable to end coaching relationship.");
+    } finally {
+      setEndingRelationship(false);
+    }
   }
-}
 
   return (
-    <div className="rounded-3xl border border-slate-800 bg-[#111827] p-8">
-      <Link
-        href="/coach/clients"
-        className="text-sm font-bold text-[#FBBF24]"
-      >
-        ← Back to Client Directory
-      </Link>
+    <div className="rounded-[2rem] border border-[#d7b56d]/30 bg-white p-5 text-[#111827] shadow-sm md:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href="/coach/clients" className="text-sm font-bold text-[#9A6A12]">
+          ← Back to Clients
+        </Link>
 
-      <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-            CLIENT WORKSPACE
-          </p>
+        <div className="flex flex-wrap gap-3">
+          <button className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-black text-[#111827] shadow-sm">
+            + Add Note
+          </button>
+          <button className="rounded-2xl bg-[#B8872A] px-4 py-2.5 text-sm font-black text-white shadow-sm">
+            Schedule Session
+          </button>
+        </div>
+      </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-4xl font-black">
+      <div className="mt-5 grid gap-5 lg:grid-cols-[1.05fr_1.35fr_0.55fr] lg:items-center">
+        <section className="flex gap-4 border-b border-slate-200 pb-5 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-5">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#FBBF24] via-[#B8872A] to-[#5B21B6] text-2xl font-black text-white shadow-lg shadow-[#B8872A]/20">
+            {initials}
+          </div>
+
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-[#FEF3C7] px-3 py-1 text-xs font-black text-[#92400E]">
+                {isSampleClient ? "Demo Client" : "Active Client"}
+              </span>
+            </div>
+
+            <h1 className="mt-2 text-3xl font-black leading-tight text-[#111827]">
               {name}
             </h1>
 
-            {isSampleClient && (
-              <span className="rounded-full bg-[#FBBF24]/15 px-3 py-1 text-sm font-black text-[#FBBF24]">
-                ⭐ Demo Workspace
-              </span>
-            )}
-          </div>
+            <p className="mt-2 font-semibold text-slate-600">{currentTitle}</p>
 
-          <p className="mt-4 text-slate-400">
-            Manage meetings, notes, reports, action items, and career
-            intelligence for this client.
+            <div className="mt-4 space-y-1.5 text-sm text-slate-600">
+              <p>📍 {location}</p>
+              <p>🎯 {targetSalary}</p>
+              <p>{hasDiscoveryReport ? "✓ Career Intelligence ready" : "• Career Intelligence pending"}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b border-slate-200 pb-5 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-5">
+          <p className="text-3xl font-black leading-none text-[#B8872A]">“</p>
+          <p className="mt-1 text-sm font-black uppercase tracking-[0.2em] text-[#B8872A]">
+            Career Story
+          </p>
+          <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-700">
+            {careerStory}
+          </p>
+          <button className="mt-3 text-sm font-black text-[#5B21B6]">
+            View full story →
+          </button>
+        </section>
+
+        <section className="flex flex-col justify-center text-center">
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-[#111827]">
+            AIQ Score
           </p>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-5">
-          <HeaderStatusCard
-            label="Career Health"
-            value={
-              clientHealth
-                ? `${clientHealth.score} · ${clientHealth.status}`
-                : "Not Scored"
-            }
-          />
-          <HeaderStatusCard
-            label="Career Assessment"
-            value={hasDiscoveryReport ? "Complete" : "Not Started"}
-          />
+          <div className="mx-auto mt-4 flex h-28 w-28 items-center justify-center rounded-full border-[8px] border-[#B8872A] bg-[#FFFBEB] shadow-inner">
+            <div>
+              <p className="text-4xl font-black text-[#B8872A]">{aiqScore}</p>
+              <p className="text-xs font-bold text-slate-500">/100</p>
+            </div>
+          </div>
 
-          <HeaderStatusCard
-            label="AIQ"
-            value={hasAIQReport ? "Complete" : "Not Started"}
-          />
-
-          <HeaderStatusCard
-            label="Open Actions"
-            value={String(openActionItems)}
-          />
-
-          <HeaderStatusCard
-            label="Next Meeting"
-            value={nextMeeting ? "Scheduled" : "None"}
-          />
-        </div>
-        </div>
-
-        <div className="flex flex-col items-start gap-3 md:items-end">
-          <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-5 py-2 font-bold text-emerald-300">
-            Active Client
-          </span>
-
-          {!isSampleClient ? (
-            <button
-              onClick={handleEndRelationship}
-              disabled={endingRelationship}
-              className="rounded-2xl border border-red-400/40 px-4 py-2 text-sm font-black text-red-300 hover:bg-red-400/10 disabled:opacity-60"
-            >
-              {endingRelationship ? "Ending..." : "End Coaching Relationship"}
-            </button>
-          ) : null}
-        </div>
+          <p className="mt-3 font-black text-[#5B21B6]">
+            {clientHealth?.status || (hasAIQReport ? "Intelligence Ready" : "Profile Building")}
+          </p>
+          <p className="mt-1 text-sm text-slate-500">
+            {hasAIQReport ? "AIQ report complete" : "Generate AIQ for deeper insight"}
+          </p>
+        </section>
       </div>
+
+      {!isSampleClient ? (
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={handleEndRelationship}
+            disabled={endingRelationship}
+            className="rounded-2xl border border-red-200 px-4 py-2 text-sm font-black text-red-500 hover:bg-red-50 disabled:opacity-60"
+          >
+            {endingRelationship ? "Ending..." : "End Coaching Relationship"}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function HeaderStatusCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-800 bg-[#020617] p-4">
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-        {label}
-      </p>
+function getInitials(name: string) {
+  const parts = name
+    .split(" ")
+    .map((part) => part.trim())
+    .filter(Boolean);
 
-      <p className="mt-2 font-black text-white">{value}</p>
-    </div>
-  );
+  if (parts.length === 0) return "AIQ";
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
 }

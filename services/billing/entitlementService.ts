@@ -58,25 +58,24 @@ const membership = memberships?.[0];
     };
   }
 
-  const now = new Date();
+const now = new Date();
 
-  if (plan.trial_ends_at) {
-    const trialEnds = new Date(plan.trial_ends_at);
-
-    if (trialEnds > now) {
-      return {
-        hasAccess: true,
-        reason: "active_trial",
-        planType: plan.plan_type,
-        trialEndsAt: plan.trial_ends_at,
-      };
-    }
+if (plan.status === "trialing") {
+  if (!plan.trial_ends_at) {
+    return {
+      hasAccess: false,
+      reason: "expired_trial",
+      planType: plan.plan_type,
+      trialEndsAt: null,
+    };
   }
 
-  if (plan.status === "active") {
+  const trialEnds = new Date(plan.trial_ends_at);
+
+  if (trialEnds > now) {
     return {
       hasAccess: true,
-      reason: "active_subscription",
+      reason: "active_trial",
       planType: plan.plan_type,
       trialEndsAt: plan.trial_ends_at,
     };
@@ -88,4 +87,21 @@ const membership = memberships?.[0];
     planType: plan.plan_type,
     trialEndsAt: plan.trial_ends_at,
   };
+}
+
+if (plan.status === "active") {
+  return {
+    hasAccess: true,
+    reason: "active_subscription",
+    planType: plan.plan_type,
+    trialEndsAt: plan.trial_ends_at,
+  };
+}
+
+return {
+  hasAccess: false,
+  reason: "no_plan",
+  planType: plan.plan_type,
+  trialEndsAt: plan.trial_ends_at,
+};
 }

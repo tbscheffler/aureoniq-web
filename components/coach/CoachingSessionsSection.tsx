@@ -14,22 +14,22 @@ type CoachingSessionsSectionProps = {
 export default function CoachingSessionsSection({
   organizationClientId,
 }: CoachingSessionsSectionProps) {
-    const router = useRouter();
+  const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [sessions, setSessions] = useState<any[]>([]);
 
   useEffect(() => {
-  loadSessions();
-    }, []);
+    loadSessions();
+  }, [organizationClientId]);
 
-    async function loadSessions() {
+  async function loadSessions() {
     const data = await getOrganizationClientCoachingSessions(
-        organizationClientId
+      organizationClientId
     );
 
     setSessions(data || []);
-    }
+  }
 
   async function handleCreateSession() {
     try {
@@ -51,66 +51,81 @@ export default function CoachingSessionsSection({
   }
 
   return (
-    <section className="rounded-3xl border border-slate-800 bg-[#111827] p-6 text-white">
-      <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-        COACHING SESSIONS
-      </p>
-
-      <h2 className="mt-3 text-2xl font-black">Coaching Sessions</h2>
-
-      <p className="mt-3 max-w-2xl text-sm text-slate-400">
-        Plan, conduct, and review structured coaching sessions for this client.
-      </p>
-
-      <div className="mt-6 rounded-2xl border border-dashed border-slate-700 bg-[#020617] p-6">
-        {sessions.length === 0 ? (
-  <p className="font-black text-slate-200">No coaching sessions yet.</p>
-) : (
-  <div className="space-y-3">
-    {sessions.map((session) => (
-      <div
-        key={session.id}
-        className="rounded-2xl border border-slate-800 bg-[#111827] p-4"
-      >
-        <p className="font-black text-white">
-          {session.title || "Coaching Session"}
-        </p>
-
-        <p className="mt-1 text-sm text-slate-400">
-          Status: {session.status || "planned"}
-        </p>
-
-        <p className="mt-1 text-sm text-slate-500">
-          {session.scheduled_for
-            ? new Date(session.scheduled_for).toLocaleDateString()
-            : "No date set"}
-        </p>
-        <button
-        type="button"
-        onClick={() =>
-            router.push(
-            `/coach/clients/${organizationClientId}/sessions/${session.id}`
-            )
-        }
-        className="mt-4 rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-[#FBBF24] hover:text-[#FBBF24]"
-        >
-        Open Session
-        </button>
-      </div>
-    ))}
-  </div>
-)}
+    <section className="rounded-[2rem] border border-slate-200 bg-white p-7 text-[#111827] shadow-sm">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.22em] text-[#B8872A]">
+            SESSION TIMELINE
+          </p>
+          <h2 className="mt-3 text-3xl font-black">Past and upcoming conversations</h2>
+          <p className="mt-3 max-w-3xl leading-7 text-slate-600">
+            Review coaching sessions in context. Each conversation can add new
+            evidence that makes future Career Intelligence Briefs more useful.
+          </p>
+        </div>
 
         <button
           type="button"
           onClick={handleCreateSession}
           disabled={saving}
-          className="mt-5 rounded-xl bg-[#FBBF24] px-5 py-3 text-sm font-black text-[#020617] disabled:opacity-60"
+          className="rounded-2xl bg-[#4C1D95] px-5 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#3B147B] disabled:opacity-60"
         >
-          {saving ? "Creating..." : "New Session"}
+          {saving ? "Creating..." : "+ New Session"}
         </button>
+      </div>
 
-        {message ? <p className="mt-4 text-sm text-slate-400">{message}</p> : null}
+      <div className="mt-7 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+        {sessions.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-6">
+            <p className="font-black text-slate-800">No coaching sessions yet.</p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+              Create a session when you are ready to capture the next coaching conversation.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((session) => (
+              <div
+                key={session.id}
+                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+              >
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="font-black text-slate-950">
+                      {session.title || "Coaching Session"}
+                    </p>
+
+                    <div className="mt-2 flex flex-wrap gap-2 text-sm font-semibold text-slate-500">
+                      <span>Status: {session.status || "planned"}</span>
+                      <span>•</span>
+                      <span>
+                        {session.scheduled_for
+                          ? new Date(session.scheduled_for).toLocaleDateString()
+                          : "No date set"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        `/coach/clients/${organizationClientId}/sessions/${session.id}`
+                      )
+                    }
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-[#4C1D95] shadow-sm transition hover:border-[#4C1D95]"
+                  >
+                    Open Session
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {message ? (
+          <p className="mt-4 text-sm font-semibold text-slate-500">{message}</p>
+        ) : null}
       </div>
     </section>
   );

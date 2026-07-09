@@ -36,17 +36,20 @@ begin
     raise exception 'Invitation code has reached its redemption limit.';
   end if;
 
-  insert into organizations (
-    name,
-    type,
-    created_by
-  )
-  values (
-    'My Coaching Practice',
-    'coach',
-    v_user_id
-  )
-  returning * into v_org;
+insert into organizations (
+  name,
+  type,
+  created_by
+)
+values (
+  coalesce(
+    nullif(auth.jwt() -> 'user_metadata' ->> 'business_name', ''),
+    'My Coaching Practice'
+  ),
+  'coach',
+  v_user_id
+)
+returning * into v_org;
 
   insert into organization_members (
     organization_id,

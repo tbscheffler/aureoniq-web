@@ -5,49 +5,34 @@ type ClientWorkspaceSidebarProps = {
 
 const sections = [
   {
-    key: "overview",
-    label: "Overview",
-    description: "Client status and next steps",
+    key: "understand",
+    label: "Understand",
+    description: "Career story and intelligence",
+    icon: "◎",
   },
   {
-    key: "discovery",
-    label: "Career Assessment",
-    description: "Career paths and opportunity analysis",
+    key: "evaluate",
+    label: "Evaluate",
+    description: "Opportunity Intelligence",
+    icon: "◈",
   },
   {
-    key: "aiq",
-    label: "Future Potential",
-    description: "AIQ career intelligence report",
+    key: "grow",
+    label: "Grow",
+    description: "Briefing and growth plan",
+    icon: "✦",
   },
   {
-    key: "resume",
-    label: "Resume Review",
-    description: "Review resume strengths and improvement areas",
+    key: "progress",
+    label: "Progress",
+    description: "Career journey over time",
+    icon: "⌁",
   },
   {
-    key: "timeline",
-    label: "Career Journey",
-    description: "Progress and activity over time",
-  },
-  {
-    key: "notes",
-    label: "Coach Notes",
-    description: "Private coaching observations",
-  },
-  {
-    key: "sessions",
-    label: "Coaching Sessions",
-    description: "Plan, conduct, and review coaching sessions",
-  },
-  {
-    key: "meetings",
-    label: "Meetings",
-    description: "Session history and follow-ups",
-  },
-  {
-    key: "actions",
-    label: "Action Plan",
-    description: "Tasks and next steps",
+    key: "reflections",
+    label: "Reflections",
+    description: "Private coach observations",
+    icon: "✎",
   },
 ];
 
@@ -56,9 +41,9 @@ export default function ClientWorkspaceSidebar({
   setActiveSection,
 }: ClientWorkspaceSidebarProps) {
   return (
-    <div className="rounded-3xl border border-slate-800 bg-[#111827] p-5">
-      <p className="text-sm font-black tracking-[0.25em] text-[#FBBF24]">
-        CAREER INTELLIGENCE
+    <div className="rounded-[2rem] border border-slate-800 bg-[#050B1F] p-5 shadow-sm">
+      <p className="text-xs font-black tracking-[0.25em] text-[#D4AF37]">
+        CLIENT WORKSPACE
       </p>
 
       <div className="mt-6 space-y-3">
@@ -69,24 +54,36 @@ export default function ClientWorkspaceSidebar({
             <button
               key={section.key}
               onClick={() => setActiveSection(section.key)}
-              className={`w-full rounded-2xl p-4 text-left transition ${
+              className={`flex w-full items-start gap-3 rounded-2xl p-4 text-left transition ${
                 active
-                  ? "bg-[#FBBF24] text-[#020617]"
-                  : "border border-slate-800 bg-[#020617] text-slate-300 hover:border-[#FBBF24]"
+                  ? "bg-[#5B21B6] text-white shadow-lg shadow-[#5B21B6]/20"
+                  : "text-slate-300 hover:bg-white/5 hover:text-white"
               }`}
             >
-              <p className="font-black">{section.label}</p>
-
-              <p
-                className={`mt-1 text-xs ${
-                  active ? "text-[#020617]/70" : "text-slate-500"
+              <span
+                className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-sm font-black ${
+                  active ? "bg-white/15 text-[#FBBF24]" : "bg-white/5 text-[#D4AF37]"
                 }`}
               >
-                {section.description}
-              </p>
+                {section.icon}
+              </span>
+
+              <span>
+                <span className="block font-black">{section.label}</span>
+                <span className={`mt-1 block text-xs ${active ? "text-white/70" : "text-slate-500"}`}>
+                  {section.description}
+                </span>
+              </span>
             </button>
           );
         })}
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-[#D4AF37]/20 bg-[#D4AF37]/10 p-4">
+        <p className="text-sm font-black text-[#D4AF37]">AIQ Advantage</p>
+        <p className="mt-2 text-xs leading-5 text-slate-300">
+          Career intelligence that helps coaches understand the person behind the profile.
+        </p>
       </div>
     </div>
   );

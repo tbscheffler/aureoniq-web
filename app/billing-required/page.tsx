@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 const reasonMessages: Record<string, string> = {
   no_plan: "Your coach workspace does not have an active plan yet.",
   expired_trial:
-    "Your coach trial has ended. Activate billing to continue using your workspace.",
+  "Your trial has ended. Subscribe to Coach Professional to continue using your coach workspace.",
   active_subscription: "Your subscription is active.",
   active_trial: "Your trial is active.",
 };

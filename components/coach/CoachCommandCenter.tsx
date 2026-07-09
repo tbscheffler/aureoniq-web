@@ -38,10 +38,10 @@ function getReason(client: any) {
   }
 
   if (score >= 50) {
-    return "Career Health is declining. Coach review recommended.";
+    return "Career Health is declining. Coach review may help.";
   }
 
-  return "Immediate coaching attention recommended.";
+  return "Immediate coaching attention may be useful.";
 }
 
 export default function CoachCommandCenter({ clients }: Props) {
@@ -49,43 +49,58 @@ export default function CoachCommandCenter({ clients }: Props) {
 
   return (
     <DashboardCard
-      eyebrow="COACH COMMAND CENTER"
-      title="What Needs Attention"
+      eyebrow="CLIENT INTELLIGENCE"
+      title="Clients to review"
       className="h-full"
     >
-      <div className="mt-6 grid gap-4">
-        {priorityClients.map((client) => (
-          <Link
-            key={client.id}
-            href={`/coach/clients/${client.id}`}
-            className="rounded-2xl border border-slate-800 bg-[#020617] p-5 transition hover:border-[#FBBF24]"
-          >
-            <div className="flex items-center justify-between">
-  <p className="font-black text-white">
-    {getClientName(client)}
-  </p>
+      <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+        Open the client workspace that needs attention or use a demo workspace
+        to practice the coaching flow.
+      </p>
 
-  {client.health?.score != null && (
-    <span className="rounded-full bg-[#FBBF24]/10 px-3 py-1 text-sm font-black text-[#FBBF24]">
-      {client.health.score}
-    </span>
-  )}
-</div>
-            <p className="mt-2 text-sm text-slate-400">{getReason(client)}</p>
-          </Link>
-        ))}
+      <div className="mt-6 grid gap-4">
+        {priorityClients.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="font-black text-slate-950">No clients yet.</p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+              Invite your first client to begin building a Career Intelligence
+              workspace.
+            </p>
+          </div>
+        ) : (
+          priorityClients.map((client) => (
+            <Link
+              key={client.id}
+              href={`/coach/clients/${client.id}`}
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-[#B8872A] hover:bg-[#FFF8E7]"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <p className="font-black text-slate-950">{getClientName(client)}</p>
+
+                {client.health?.score != null ? (
+                  <span className="rounded-full border border-[#E8D49B] bg-[#FFF8E7] px-3 py-1 text-sm font-black text-[#9A6A12]">
+                    {client.health.score}
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                {getReason(client)}
+              </p>
+            </Link>
+          ))
+        )}
 
         <div className="grid gap-3 md:grid-cols-2">
           <a
             href="/coach/clients#invite-client"
-            className="rounded-2xl border border-[#FBBF24]/30 bg-[#FBBF24]/10 p-4 font-black text-[#FBBF24]"
+            className="rounded-2xl bg-[#4C1D95] p-4 text-center text-sm font-black text-white transition hover:bg-[#3B147B]"
           >
             + Invite Client
           </a>
 
           <Link
             href="/coach/team"
-            className="rounded-2xl border border-slate-700 p-4 font-black text-white hover:border-[#FBBF24]"
+            className="rounded-2xl border border-slate-200 bg-white p-4 text-center text-sm font-black text-slate-700 transition hover:border-[#4C1D95] hover:text-[#4C1D95]"
           >
             Invite Team Member
           </Link>
