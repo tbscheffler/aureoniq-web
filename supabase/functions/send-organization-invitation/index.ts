@@ -50,7 +50,10 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "http://localhost:3000";
+    const configuredSiteUrl = new URL(Deno.env.get("PUBLIC_SITE_URL") || "https://www.aureoniq.com");
+    const siteUrl = ["localhost", "127.0.0.1", "[::1]"].includes(configuredSiteUrl.hostname)
+      ? "https://www.aureoniq.com"
+      : configuredSiteUrl.origin;
 
     if (!supabaseUrl || !serviceRoleKey || !resendApiKey) {
       return jsonResponse({ error: "Missing server secrets" }, 500);
