@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { safeRedirect } from "@/lib/safeRedirect";
 import { Suspense, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useSearchParams } from "next/navigation";
@@ -15,12 +16,13 @@ export default function SignupPage() {
 
 function SignupContent() {
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const redirect = safeRedirect(searchParams.get("redirect"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   async function handleSignup() {
     try {
@@ -31,10 +33,11 @@ function SignupContent() {
         return;
       }
 
-      const { error } = await supabase.auth.signUp({
-        email,
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
         password,
         options: {
+          emailRedirectTo: new URL(redirect, window.location.origin).toString(),
           data: {
             display_name: displayName,
             signup_type: "client_invite",
@@ -47,13 +50,13 @@ function SignupContent() {
         return;
       }
 
-      alert(
-    "Account created. Please check your email and verify your AureonIQ account before accepting your coach invitation."
-    );
-
-    window.location.href = redirect;
-    } catch (err: any) {
-      alert(err.message || "Signup failed");
+      if (data.session) {
+        window.location.href = redirect;
+      } else {
+        setSubmitted(true);
+      }
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Signup failed");
     } finally {
       setLoading(false);
     }
@@ -81,6 +84,13 @@ function SignupContent() {
         </p>
 
         <div className="mt-10 space-y-4">
+          {submitted ? (
+            <div role="status" className="rounded-2xl border border-slate-700 p-5 text-slate-300">
+              <p>Check your email to confirm your account. The confirmation link will return you to your invitation.</p>
+              <p className="mt-3">If you already have an account, sign in below using the email your coach invited.</p>
+              <Link href={redirect} className="mt-4 block font-bold text-[#FBBF24]">Return to invitation after verification</Link>
+            </div>
+          ) : null}
           <input
             className="w-full rounded-2xl border border-slate-700 bg-[#111827] px-5 py-4 text-white outline-none focus:border-[#FBBF24]"
             placeholder="Display name optional"
@@ -105,10 +115,10 @@ function SignupContent() {
 
           <button
             onClick={handleSignup}
-            disabled={loading}
+            disabled={loading || submitted}
             className="w-full rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617] disabled:opacity-60"
           >
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? "Creating account..." : submitted ? "Check your email" : "Create Account"}
           </button>
 
           <p className="text-center text-sm text-slate-500">

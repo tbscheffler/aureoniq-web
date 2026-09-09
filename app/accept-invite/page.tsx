@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
@@ -8,120 +9,81 @@ export default function AcceptInvitePage() {
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [invitation, setInvitation] = useState<any>(null);
+  const [invitation, setInvitation] = useState<{
+    id: string; client_email: string; status: string; expires_at: string;
+    organizations: { name: string };
+  } | null>(null);
+  const [wrongAccount, setWrongAccount] = useState(false);
   const [message, setMessage] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [clientDisplayName, setClientDisplayName] = useState("");
 
   useEffect(() => {
     async function loadInvitation() {
-      const params = new URLSearchParams(window.location.search);
-      const inviteToken = params.get("token");
-
-      if (!inviteToken) {
-        setMessage("Missing invitation token.");
-        setLoading(false);
-        return;
-      }
-
-      setToken(inviteToken);
-
-const { data, error } = await supabase.rpc(
-  "get_organization_invitation_preview",
-  { invite_token: inviteToken }
-);
-
-const invite = Array.isArray(data) ? data[0] : data;
-
-if (error || !invite) {
-  setMessage("Invitation not found or no longer available.");
-  setLoading(false);
-  return;
-}
-
-setInvitation({
-  id: invite.id,
-  client_email: invite.client_email,
-  status: invite.status,
-  expires_at: invite.expires_at,
-  organizations: { name: invite.organization_name },
-});
-      setLoading(false);
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const inviteToken = params.get("token");
+        if (!inviteToken) { setMessage("Missing invitation token."); return; }
+        setToken(inviteToken);
+        const { data, error } = await supabase.rpc("get_organization_invitation_preview", { invite_token: inviteToken });
+        const invite = Array.isArray(data) ? data[0] : data;
+        if (error || !invite) { setMessage("Invitation not found or no longer available."); return; }
+        if (invite.status !== "pending" || new Date(invite.expires_at).getTime() <= Date.now()) {
+          setMessage("This invitation has been accepted, expired, or revoked. If you already connected, open the AureonIQ app with the same email.");
+          return;
+        }
+        setInvitation({ ...invite, organizations: { name: invite.organization_name } });
+        const authError = new URLSearchParams(window.location.hash.slice(1)).get("error_description");
+        if (authError) setMessage("Email verification did not complete. Please reopen your latest confirmation email, or sign in if you already verified.");
+      } catch {
+        setMessage("We could not load your invitation. Please refresh and try again.");
+      } finally { setLoading(false); }
     }
 
     loadInvitation();
   }, []);
 
   async function acceptInvitation() {
-    if (!token) return;
-
+    if (!token || !invitation || accepting) return;
     setAccepting(true);
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-if (!user) {
-  const returnUrl = encodeURIComponent(`/accept-invite?token=${token}`);
-
-  const { data: hasAccount, error: accountCheckError } = await supabase.rpc(
-    "invited_email_has_account",
-    { invite_token: token }
-  );
-
-  if (accountCheckError) {
-    setMessage(
-      "We could not verify this invitation. Please try again or ask your coach to resend the invite."
-    );
-    setAccepting(false);
-    return;
+    setMessage("");
+    setWrongAccount(false);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const returnUrl = encodeURIComponent("/accept-invite?token=" + encodeURIComponent(token));
+      if (!user) {
+        const { data: hasAccount, error } = await supabase.rpc("invited_email_has_account", { invite_token: token });
+        if (error) throw new Error("We could not verify this invitation. Please try again.");
+        window.location.href = (hasAccount ? "/login" : "/client-signup") + "?redirect=" + returnUrl;
+        return;
+      }
+      if (user.email?.trim().toLowerCase() !== invitation.client_email.trim().toLowerCase()) {
+        setWrongAccount(true);
+        setMessage("You are signed in with a different email. Sign in with the email your coach invited.");
+        return;
+      }
+      if (!user.email_confirmed_at) {
+        setMessage("Please verify your email before accepting this invitation.");
+        return;
+      }
+      const { error } = await supabase.rpc("accept_organization_invitation", {
+        invite_token: token, client_display_name_input: clientDisplayName.trim(),
+      });
+      if (error) throw error;
+      setAccepted(true);
+    } catch (error: unknown) {
+      setMessage(error && typeof error === "object" && "message" in error ? String(error.message) : "We could not accept this invitation. Please try again.");
+    } finally { setAccepting(false); }
   }
 
-  if (hasAccount) {
-    setMessage(
-      "This invitation is connected to an existing AureonIQ account. Please sign in using the email your coach invited."
-    );
-    window.location.href = `/login?redirect=${returnUrl}`;
-  } else {
-    setMessage(
-      "To accept this coach invitation, first create an AureonIQ account using the email your coach invited."
-    );
-    window.location.href = `/client-signup?redirect=${returnUrl}`;
-  }
-
-  setAccepting(false);
-  return;
-}
-
-const { data, error } = await supabase.rpc(
-  "accept_organization_invitation",
-  {
-    invite_token: token,
-    client_display_name_input: clientDisplayName.trim(),
-  }
-);
-
-console.log("RPC DATA:", data);
-console.log("RPC ERROR:", error);
-
-if (error) {
-  console.error(error);
-
-  setMessage(
-    error.message.includes("Invitation not found")
-      ? "This invitation has already been accepted, expired, or is no longer available. If you already connected with your coach, open the AureonIQ app and sign in with the same email."
-      : error.message
-  );
-
-  setAccepting(false);
-  return;
-}
-
-    setMessage(
-      "You're connected! Your coach can now view your shared AureonIQ career reports. Next, open the AureonIQ app and sign in with this same email."
-    );
-    setAccepted(true);
-    setAccepting(false);
+  async function switchAccount() {
+    setAccepting(true);
+    try {
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) throw error;
+      window.location.href = "/login?redirect=" + encodeURIComponent("/accept-invite?token=" + encodeURIComponent(token || ""));
+    } catch { setMessage("We could not sign you out. Please try again."); }
+    finally { setAccepting(false); }
   }
 
   if (loading) {
@@ -134,9 +96,7 @@ if (error) {
     );
   }
 
-  const orgName = Array.isArray(invitation?.organizations)
-    ? invitation.organizations[0]?.name
-    : invitation?.organizations?.name;
+  const orgName = invitation?.organizations.name;
 
   if (accepted) {
   return (
@@ -160,19 +120,17 @@ if (error) {
           </p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <a
-              href="/"
+            <Link               href="/"
               className="rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617]"
             >
               Back to AureonIQ
-            </a>
+            </Link>
 
-            <a
-              href="/contact"
+            <Link               href="/contact"
               className="rounded-2xl border border-slate-700 px-6 py-4 font-black text-white"
             >
               Need Help?
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -183,9 +141,9 @@ if (error) {
   return (
     <main className="min-h-screen bg-[#020617] text-white">
       <section className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6">
-        <a href="/" className="mb-8 text-sm font-bold text-[#FBBF24]">
+        <Link href="/" className="mb-8 text-sm font-bold text-[#FBBF24]">
           ← Back to AureonIQ
-        </a>
+        </Link>
 
         <p className="mb-4 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
           COACH INVITATION
@@ -230,12 +188,13 @@ if (error) {
 
         <button
           onClick={acceptInvitation}
-          disabled={accepting}
+          disabled={accepting || !invitation || wrongAccount}
           className="mt-8 rounded-2xl bg-[#FBBF24] px-6 py-4 font-black text-[#020617] disabled:opacity-60"
         >
           {accepting ? "Accepting..." : "Accept Invitation"}
         </button>
 
+        {wrongAccount ? <button onClick={switchAccount} disabled={accepting} className="mt-4 block font-bold text-[#FBBF24]">Sign in with the invited email</button> : null}
         {message ? (
           <div className="mt-6 rounded-2xl border border-slate-800 bg-[#111827] p-5 text-slate-300">
             <p>{message}</p>

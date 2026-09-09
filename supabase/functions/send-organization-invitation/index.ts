@@ -96,13 +96,14 @@ serve(async (req) => {
       return jsonResponse({ error: planError.message }, 400);
     }
 
-    const clientLimit = Number(activePlan?.managed_client_limit ?? 4);
+    const clientLimit = Number(activePlan?.managed_client_limit ?? 0);
 
     const { count: activeClientCount, error: clientCountError } = await supabase
       .from("organization_clients")
       .select("*", { count: "exact", head: true })
       .eq("organization_id", organization_id)
-      .eq("status", "active");
+      .eq("status", "active")
+      .or("is_sample.eq.false,is_sample.is.null");
 
     if (clientCountError) {
       return jsonResponse({ error: clientCountError.message }, 400);

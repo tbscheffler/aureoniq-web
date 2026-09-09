@@ -1,6 +1,8 @@
 "use client";
+import Link from "next/link";
 
 import { useState } from "react";
+import { safeRedirect } from "@/lib/safeRedirect";
 import { supabase } from "@/lib/supabaseClient";
 import { getUserWorkspaceAccess } from "@/services/workspaceAccessService";
 import { redeemInvitationCode } from "@/services/coachService";
@@ -15,7 +17,7 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -24,19 +26,6 @@ export default function LoginPage() {
         alert(error.message);
         return;
       }
-
-      const user = data.user;
-
-      const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role, user_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    
-      console.log("LOGIN USER ID:", user.id);
-      console.log("LOGIN USER EMAIL:", user.email);
-      console.log("ROLE DATA:", roleData);
-      console.log("ROLE ERROR:", roleError);
 
 const searchParams = new URLSearchParams(window.location.search);
 const signupSuccess = searchParams.get("signup") === "success";
@@ -57,8 +46,8 @@ if (signupSuccess) {
 
 const redirect = searchParams.get("redirect");
 
-if (redirect && redirect.startsWith("/")) {
-  window.location.href = redirect;
+if (redirect) {
+  window.location.href = safeRedirect(redirect);
   return;
 }
 
@@ -75,8 +64,8 @@ if (workspaces.length > 1) {
 }
 
 window.location.href = "/dashboard";
-    } catch (err: any) {
-      alert(err.message || "Login failed");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
     }
@@ -85,9 +74,9 @@ window.location.href = "/dashboard";
   return (
     <main className="min-h-screen bg-[#020617] text-white">
       <section className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
-        <a href="/" className="mb-8 text-sm font-bold text-[#FBBF24]">
+        <Link href="/" className="mb-8 text-sm font-bold text-[#FBBF24]">
           ← Back to AureonIQ
-        </a>
+        </Link>
 
         <p className="mb-4 text-sm font-black tracking-[0.25em] text-[#FBBF24]">
           AUREONIQ PORTAL
